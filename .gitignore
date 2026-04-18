@@ -1,0 +1,24 @@
+# Ignorar archivos de configuración sensibles
+.env
+
+# Ignorar datasets (mejor descargarlos con el script)
+**/ucr-futsal-ball2-6/
+**/labels.cache
+
+# Ignorar videos pesados (en cualquier subcarpeta)
+**/*.mp4
+**/*.avi
+**/*.mov
+**/futsal_prediction/
+**/runs/
+
+# Ignorar logs de SLURM y Python
+*.log
+*.err
+**/__pycache__/
+.ipynb_checkpoints/
+
+# Pesos de entrenamiento
+# Solo subiremos el README y los scripts por ahora, 
+# los pesos se pueden subir manualmente si son necesarios.
+**/*.pt
