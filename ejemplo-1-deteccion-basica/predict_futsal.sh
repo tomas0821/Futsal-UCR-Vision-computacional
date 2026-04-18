@@ -16,7 +16,7 @@ source $CONDA_PATH/etc/profile.d/conda.sh
 conda activate futsal_env
 
 # Navigate to project directory
-cd /home/tomas.rojas_s/futsal/ucr-futsal-ball2
+cd /home/tomas.rojas_s/futsal/ejemplo-1-deteccion-basica
 
 # Run inference
 yolo task=detect mode=predict \
