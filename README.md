@@ -6,8 +6,8 @@ Este repositorio es una guía técnica y un catálogo de ejemplos para el análi
 
 | Ejemplo | Descripción | Modelo | Estado |
 | :--- | :--- | :--- | :--- |
-| **[Ejemplo 1: Detección Básica](./ejemplo-1-deteccion-basica/)** | Entrenamiento de un modelo YOLOv8n para detectar el balón en video. | YOLOv8n | ✅ Completado |
-| **Ejemplo 2: Seguimiento (Tracking)** | *Próximamente* - Implementación de BoTSORT para seguir la trayectoria del balón. | - | ⏳ Pendiente |
+| **[Ejemplo 1: Detección Básica](./ejemplo-1-deteccion-basica/)** | Entrenamiento de un modelo YOLOv8m para detectar el balón. | YOLOv8m | ✅ Completado |
+| **[Ejemplo 2: Jugadores y Árbitros](./ejemplo-2-jugadores-y-arbitros/)** | Detección multiclase de personas en cancha (excluyendo el balón). | YOLOv8m | ✅ Completado |
 
 ## 🛠️ Requisitos Generales
 

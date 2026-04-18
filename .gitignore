@@ -3,6 +3,7 @@
 
 # Ignorar datasets (mejor descargarlos con el script)
 **/ucr-futsal-ball2-6/
+**/futsal-ucr-8/
 **/labels.cache
 
 # Ignorar videos pesados (en cualquier subcarpeta)
@@ -18,7 +19,10 @@
 .ipynb_checkpoints/
 
 # Pesos de entrenamiento
-# Permitimos el mejor peso del modelo Medium para que estudiantes puedan usarlo
+# Ejemplo 1
 !ejemplo-1-deteccion-basica/runs/detect/futsal_training/yolov8m_ball_detection/weights/best.pt
+# Ejemplo 2
+!ejemplo-2-jugadores-y-arbitros/runs/detect/futsal_jugadores_arbitros/yolov8m_sin_balon/weights/best.pt
+
 # Ignorar el resto de archivos .pt
 **/*.pt
