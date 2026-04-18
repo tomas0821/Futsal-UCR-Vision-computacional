@@ -10,7 +10,6 @@
 **/*.avi
 **/*.mov
 **/futsal_prediction/
-**/runs/
 
 # Ignorar logs de SLURM y Python
 *.log
@@ -19,6 +18,7 @@
 .ipynb_checkpoints/
 
 # Pesos de entrenamiento
-# Solo subiremos el README y los scripts por ahora, 
-# los pesos se pueden subir manualmente si son necesarios.
+# Permitimos el mejor peso del modelo Medium para que estudiantes puedan usarlo
+!ejemplo-1-deteccion-basica/runs/detect/futsal_training/yolov8m_ball_detection/weights/best.pt
+# Ignorar el resto de archivos .pt
 **/*.pt

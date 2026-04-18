@@ -8,8 +8,8 @@ def train():
     print(f"Usando dispositivo: {device}")
     
     # Cargar el modelo
-    # Se recomienda cargar un modelo pre-entrenado para iniciar el entrenamiento
-    model = YOLO('yolov8n.pt') 
+    # Cambiamos a la versión Medium (m) para buscar mayor precisión
+    model = YOLO('yolov8m.pt') 
 
     # Entrenar el modelo
     # Buscamos el archivo data.yaml en la carpeta del dataset descargado
@@ -35,7 +35,7 @@ def train():
         batch=16,
         device=device,
         project='futsal_training',
-        name='yolov8_ball_detection'
+        name='yolov8m_ball_detection'
     )
     
     print("Entrenamiento completado.")
