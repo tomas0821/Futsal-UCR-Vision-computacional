@@ -10,16 +10,16 @@
 #SBATCH --output=futsal_train_%j.log
 #SBATCH --error=futsal_train_%j.err
 
-# Load conda environment
+# Cargar el entorno de conda
 CONDA_PATH=$(conda info --base)
 source $CONDA_PATH/etc/profile.d/conda.sh
 conda activate futsal_env
 
-# Navigate to project directory
+# Navegar al directorio del proyecto (Ejemplo 1)
 cd /home/tomas.rojas_s/futsal/ejemplo-1-deteccion-basica
 
-# Step 1: Download dataset (if not already downloaded)
+# Paso 1: Descargar el dataset (si no se ha hecho antes)
 python download_dataset.py
 
-# Step 2: Start training
+# Paso 2: Iniciar el entrenamiento
 python train.py

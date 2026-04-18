@@ -3,19 +3,18 @@ from ultralytics import YOLO
 import torch
 
 def train():
-    # Check if GPU is available
+    # Verificar si hay una GPU disponible
     device = 0 if torch.cuda.is_available() else 'cpu'
-    print(f"Using device: {device}")
+    print(f"Usando dispositivo: {device}")
     
-    # Load a model
-    model = YOLO('yolov8n.pt')  # load a pretrained model (recommended for training)
+    # Cargar el modelo
+    # Se recomienda cargar un modelo pre-entrenado para iniciar el entrenamiento
+    model = YOLO('yolov8n.pt') 
 
-    # Train the model
-    # The data path is usually the dataset folder name/data.yaml
-    # We'll assume the dataset is downloaded to the current directory's 'datasets' or similar.
-    # Roboflow usually creates a folder like project-version
+    # Entrenar el modelo
+    # Buscamos el archivo data.yaml en la carpeta del dataset descargado
+    # Roboflow suele crear una carpeta con el nombre del proyecto y versión
     
-    # We'll look for data.yaml in the downloaded dataset folder
     possible_data_yaml = None
     for root, dirs, files in os.walk('.'):
         if 'data.yaml' in files:
@@ -23,11 +22,12 @@ def train():
             break
     
     if not possible_data_yaml:
-        print("Error: data.yaml not found. Make sure dataset is downloaded.")
+        print("Error: No se encontró data.yaml. Asegúrate de que el dataset esté descargado.")
         return
 
-    print(f"Using data configuration from: {possible_data_yaml}")
+    print(f"Usando configuración de datos desde: {possible_data_yaml}")
     
+    # Iniciar el proceso de entrenamiento
     results = model.train(
         data=possible_data_yaml,
         epochs=100,
@@ -38,7 +38,7 @@ def train():
         name='yolov8_ball_detection'
     )
     
-    print("Training complete.")
+    print("Entrenamiento completado.")
 
 if __name__ == "__main__":
     train()

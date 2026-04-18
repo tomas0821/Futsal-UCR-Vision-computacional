@@ -10,15 +10,18 @@
 #SBATCH --output=futsal_predict_%j.log
 #SBATCH --error=futsal_predict_%j.err
 
-# Load conda environment
+# Cargar el entorno de conda
 CONDA_PATH=$(conda info --base)
 source $CONDA_PATH/etc/profile.d/conda.sh
 conda activate futsal_env
 
-# Navigate to project directory
+# Navegar al directorio del proyecto (Ejemplo 1)
 cd /home/tomas.rojas_s/futsal/ejemplo-1-deteccion-basica
 
-# Run inference
+# Ejecutar inferencia
+# model: Ruta al mejor peso obtenido en el entrenamiento
+# source: Video de entrada
+# conf: Umbral de confianza
 yolo task=detect mode=predict \
   model=runs/detect/futsal_training/yolov8_ball_detection/weights/best.pt \
   source=videos/20250719_193728.mp4 \
