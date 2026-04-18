@@ -8,11 +8,12 @@ Este repositorio es una guía técnica y un catálogo de ejemplos para el análi
 | :--- | :--- | :--- | :--- |
 | **[Ejemplo 1: Detección Básica](./ejemplo-1-deteccion-basica/)** | Entrenamiento de un modelo YOLOv8m para detectar el balón. | YOLOv8m | ✅ Completado |
 | **[Ejemplo 2: Jugadores y Árbitros](./ejemplo-2-jugadores-y-arbitros/)** | Detección multiclase de personas en cancha (excluyendo el balón). | YOLOv8m | ✅ Completado |
+| **[Ejemplo 3: Modelos Combinados](./ejemplo-3-modelos-combinados/)** | Tutorial avanzado: Inferencia simultánea usando múltiples modelos. | Multimodelo | ✅ Completado |
 
 ## 🛠️ Requisitos Generales
 
 1.  **Entorno:** Se recomienda usar un entorno Conda (ej. `futsal_env`).
-2.  **Librerías:** `ultralytics`, `roboflow`, `python-dotenv`.
+2.  **Librerías:** `ultralytics`, `roboflow`, `python-dotenv`, `opencv-python`.
 3.  **Hardware:** Acceso al cluster SLURM para entrenamiento en GPU.
 
 ## 🤝 Contribuciones

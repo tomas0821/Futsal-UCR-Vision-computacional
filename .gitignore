@@ -11,6 +11,7 @@
 **/*.avi
 **/*.mov
 **/futsal_prediction/
+**/videos/video_combinado.mp4
 
 # Ignorar logs de SLURM y Python
 *.log
