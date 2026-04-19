@@ -9,6 +9,7 @@ Este repositorio es una guía técnica y un catálogo de ejemplos para el análi
 | **[Ejemplo 1: Detección Básica](./ejemplo-1-deteccion-basica/)** | Entrenamiento de un modelo YOLOv8m para detectar el balón. | YOLOv8m | ✅ Completado |
 | **[Ejemplo 2: Jugadores y Árbitros](./ejemplo-2-jugadores-y-arbitros/)** | Detección multiclase de personas en cancha (excluyendo el balón). | YOLOv8m | ✅ Completado |
 | **[Ejemplo 3: Modelos Combinados](./ejemplo-3-modelos-combinados/)** | Tutorial avanzado: Inferencia simultánea usando múltiples modelos. | Multimodelo | ✅ Completado |
+| **[Ejemplo 4: Keypoints de Cancha](./ejemplo-4-deteccion-cancha-keypoints/)** | Estimación de pose para detectar la geometría y 22 puntos de la cancha. | YOLOv8m-pose | ✅ Completado |
 
 ## 🛠️ Requisitos Generales
 

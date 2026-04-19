@@ -4,6 +4,7 @@
 # Ignorar datasets (mejor descargarlos con el script)
 **/ucr-futsal-ball2-6/
 **/futsal-ucr-8/
+**/futsal-pitch-detection-4/
 **/labels.cache
 
 # Ignorar videos pesados (en cualquier subcarpeta)
@@ -11,7 +12,7 @@
 **/*.avi
 **/*.mov
 **/futsal_prediction/
-**/videos/video_combinado.mp4
+**/futsal_pitch_prediction/
 
 # Ignorar logs de SLURM y Python
 *.log
@@ -19,11 +20,10 @@
 **/__pycache__/
 .ipynb_checkpoints/
 
-# Pesos de entrenamiento
-# Ejemplo 1
+# Pesos de entrenamiento permitidos
 !ejemplo-1-deteccion-basica/runs/detect/futsal_training/yolov8m_ball_detection/weights/best.pt
-# Ejemplo 2
 !ejemplo-2-jugadores-y-arbitros/runs/detect/futsal_jugadores_arbitros/yolov8m_sin_balon/weights/best.pt
+!ejemplo-4-deteccion-cancha-keypoints/runs/pose/futsal_pitch_detection/yolov8m_pitch_keypoints/weights/best.pt
 
 # Ignorar el resto de archivos .pt
 **/*.pt
