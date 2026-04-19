@@ -25,4 +25,4 @@ Para profundizar en las técnicas utilizadas en este proyecto, se recomiendan lo
 3.  **Hardware:** Acceso al cluster SLURM para entrenamiento en GPU.
 
 ## 🤝 Contribuciones
-Los estudiantes asistentes deben seguir la estructura de carpetas `ejemplo-X-...` para agregar nuevos módulos al proyecto.
+Las estudiantes asistentes deben seguir la estructura de carpetas `ejemplo-X-...` para agregar nuevos módulos al proyecto.
