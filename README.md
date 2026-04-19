@@ -11,6 +11,13 @@ Este repositorio es una guía técnica y un catálogo de ejemplos para el análi
 | **[Ejemplo 3: Modelos Combinados](./ejemplo-3-modelos-combinados/)** | Tutorial avanzado: Inferencia simultánea usando múltiples modelos. | Multimodelo | ✅ Completado |
 | **[Ejemplo 4: Keypoints de Cancha](./ejemplo-4-deteccion-cancha-keypoints/)** | Estimación de pose para detectar la geometría y 22 puntos de la cancha. | YOLOv8m-pose | ✅ Completado |
 
+## 📺 Video Tutoriales de Referencia
+
+Para profundizar en las técnicas utilizadas en este proyecto, se recomiendan los siguientes tutoriales:
+
+1.  **[YOLOv8 Object Detection Tutorial](https://www.youtube.com/watch?v=aBVGKoNZQUw):** Introducción completa a la arquitectura y entrenamiento.
+2.  **[Advanced Computer Vision for Sports](https://www.youtube.com/watch?v=neBZ6huolkg&t=2140s):** Técnicas avanzadas aplicadas al análisis deportivo y seguimiento.
+
 ## 🛠️ Requisitos Generales
 
 1.  **Entorno:** Se recomienda usar un entorno Conda (ej. `futsal_env`).
