@@ -11,6 +11,10 @@ Este repositorio es una guía técnica y un catálogo de ejemplos para el análi
 | **[Ejemplo 3: Modelos Combinados](./ejemplo-3-modelos-combinados/)** | Tutorial avanzado: Inferencia simultánea usando múltiples modelos. | Multimodelo | ✅ Completado |
 | **[Ejemplo 4: Keypoints de Cancha](./ejemplo-4-deteccion-cancha-keypoints/)** | Estimación de pose para detectar la geometría y 22 puntos de la cancha. | YOLOv8m-pose | ✅ Completado |
 
+## 📖 Documentación de Investigación
+
+*   **[Análisis Bibliográfico](./analisis-bibliografico/):** Investigación técnica realizada por las estudiantes sobre el estado del arte en visión computacional deportiva.
+
 ## 📺 Video Tutoriales de Referencia
 
 Para profundizar en las técnicas utilizadas en este proyecto, se recomiendan los siguientes tutoriales:
