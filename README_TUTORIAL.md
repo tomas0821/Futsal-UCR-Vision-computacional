@@ -8,45 +8,24 @@ Tutorial práctico para aprender a ejecutar cálculos en el cluster UCR usando S
 
 **Tiempo estimado: 10 minutos**
 
-### Requisitos Previos
-
-- Ubuntu 18.04+ / Debian 10+ / CentOS 7+ / macOS
-- ~5 GB de espacio libre en disco
-- Conexión a internet
-
 ---
 
-## Paso 1️⃣: Instalar Miniforge3 (Mamba)
-
-### En Linux/macOS:
+## Paso 1️⃣: Instalar Miniforge3 (Mamba) - Método Oficial UCR
 
 ```bash
-# Descargar Miniforge3 (recomendado en UCR)
-wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+# Descargar script oficial de UCR
+wget https://git.ucr.ac.cr/hpc/scripts-instalacion/-/raw/main/miniforge3_install.sh
 
-# Ejecutar instalador
-bash Miniforge3-Linux-x86_64.sh
+# Ejecutar el script
+bash miniforge3_install.sh
 
-# Seguir las instrucciones:
-# - Presionar ENTER para revisar el contrato
-# - Escribir 'yes' para aceptar
-# - ENTER para ubicación por defecto (~/.miniforge3)
-# - Escribir 'yes' para inicializar
+# Sigue las instrucciones del script:
+# - Acepta los términos de licencia
+# - Confirma la ubicación de instalación
+# - Permite que inicialice el entorno
 
 # Reiniciar terminal o ejecutar:
 source ~/.bashrc
-```
-
-### O Usar Script Oficial de UCR:
-
-```bash
-# Descargar script oficial
-wget https://git.ucr.ac.cr/hpc/scripts-instalacion/-/raw/main/miniforge3_install.sh
-
-# Ejecutar
-bash miniforge3_install.sh
-
-# Sigue las instrucciones del script
 ```
 
 ### Verificar instalación:
@@ -56,7 +35,7 @@ mamba --version
 conda --version
 ```
 
-**Esperado:** Ambos comandos deben mostrar versiones.
+**Esperado:** Ambos comandos deben mostrar versiones (ej: `mamba 1.5.x` y `conda 24.x`).
 
 ---
 
