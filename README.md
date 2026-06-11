@@ -2,6 +2,30 @@
 
 Este repositorio es una guía técnica y un catálogo de ejemplos para el análisis de video en futsal utilizando Inteligencia Artificial. Está diseñado para ser utilizado por estudiantes asistentes e investigadores.
 
+---
+
+## 🎓 Tutorial: Cálculos en el Cluster UCR
+
+**¡NUEVO!** Aprende a ejecutar análisis de futsal en el cluster UCR con GPU.
+
+### 📚 [Ver Tutorial Completo →](./README_TUTORIAL.md)
+
+**Módulos disponibles:**
+1. **GitHub** - Acceso a archivos y clonación
+2. **SLURM Serial** - Ejecutar trabajos en la partición serial
+3. **GPU** - Acelerar cálculos con GPU
+4. **Git Avanzado** - Branches, merge y colaboración
+
+**Archivos de ejemplo en `tutorial/`:**
+- `ejemplo_serial.sh` - Script básico para SLURM
+- `ejemplo_gpu.sh` - Script con GPU
+- `simple_script.py` - Python para trabajo serial
+- `script_con_gpu.py` - Python con GPU (PyTorch/TensorFlow)
+
+**Duración total:** ~45 minutos
+
+---
+
 ## 📂 Catálogo de Ejemplos
 
 | Ejemplo | Descripción | Modelo | Estado |
@@ -28,5 +52,57 @@ Para profundizar en las técnicas utilizadas en este proyecto, se recomiendan lo
 2.  **Librerías:** `ultralytics`, `roboflow`, `python-dotenv`, `opencv-python`.
 3.  **Hardware:** Acceso al cluster SLURM para entrenamiento en GPU.
 
+## ⚡ Quick Start - Primeros Pasos
+
+### Para principiantes (sin experiencia con cluster):
+
+```bash
+# 1. Clonar repositorio
+git clone https://github.com/tomas0821/Futsal-UCR-Vision-computacional
+cd Futsal-UCR-Vision-computacional
+
+# 2. Leer el tutorial
+cat README_TUTORIAL.md
+
+# 3. Conectar al cluster
+ssh usuario@172.16.24.2
+
+# 4. Enviar tu primer trabajo
+sbatch tutorial/ejemplo_serial.sh
+
+# 5. Monitorear
+squeue -u $USER
+```
+
+### Para usuarios avanzados:
+
+```bash
+# Ir directo a GPU
+sbatch tutorial/ejemplo_gpu.sh
+
+# Ver disponibilidad GPU
+sinfo -p gpu
+
+# Crear tu rama para experimentos
+git checkout -b mi-experimento
+```
+
+---
+
 ## 🤝 Contribuciones
+
 Las estudiantes asistentes deben seguir la estructura de carpetas `ejemplo-X-...` para agregar nuevos módulos al proyecto.
+
+**Para trabajar en el cluster:**
+1. Crear una rama: `git checkout -b mi-feature`
+2. Hacer cambios y commits
+3. Mergear a master: `git merge mi-feature`
+4. Subir: `git push origin master`
+
+---
+
+## 📞 Soporte
+
+- **Preguntas sobre el tutorial:** Ver [README_TUTORIAL.md](./README_TUTORIAL.md#troubleshooting)
+- **Problemas con cluster:** Contactar administrador del cluster
+- **Issues técnicos:** Abrir un issue en GitHub
