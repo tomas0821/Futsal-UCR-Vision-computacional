@@ -4,7 +4,132 @@ Tutorial práctico para aprender a ejecutar cálculos en el cluster UCR usando S
 
 ---
 
-## 📋 Tabla de Contenidos
+## ⚙️ SETUP INICIAL (Antes de Empezar)
+
+**Tiempo estimado: 10 minutos**
+
+### Requisitos Previos
+
+- Ubuntu 18.04+ / Debian 10+ / CentOS 7+ / macOS
+- ~5 GB de espacio libre en disco
+- Conexión a internet
+
+---
+
+## Paso 1️⃣: Instalar Miniforge3 (Mamba)
+
+### En Linux/macOS:
+
+```bash
+# Descargar Miniforge3 (recomendado en UCR)
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+
+# Ejecutar instalador
+bash Miniforge3-Linux-x86_64.sh
+
+# Seguir las instrucciones:
+# - Presionar ENTER para revisar el contrato
+# - Escribir 'yes' para aceptar
+# - ENTER para ubicación por defecto (~/.miniforge3)
+# - Escribir 'yes' para inicializar
+
+# Reiniciar terminal o ejecutar:
+source ~/.bashrc
+```
+
+### O Usar Script Oficial de UCR:
+
+```bash
+# Descargar script oficial
+wget https://git.ucr.ac.cr/hpc/scripts-instalacion/-/raw/main/miniforge3_install.sh
+
+# Ejecutar
+bash miniforge3_install.sh
+
+# Sigue las instrucciones del script
+```
+
+### Verificar instalación:
+
+```bash
+mamba --version
+conda --version
+```
+
+**Esperado:** Ambos comandos deben mostrar versiones.
+
+---
+
+## Paso 2️⃣: Clonar el Repositorio
+
+```bash
+# Clonar repositorio
+git clone https://github.com/tomas0821/Futsal-UCR-Vision-computacional
+cd Futsal-UCR-Vision-computacional
+
+# Verificar estructura
+ls -la
+```
+
+---
+
+## Paso 3️⃣: Crear Entorno Conda
+
+```bash
+# Crear entorno llamado 'futsal' con Python 3.11
+mamba create -n futsal python=3.11 -y
+
+# Activar el entorno
+mamba activate futsal
+
+# Verificar activación
+python --version  # Debe mostrar Python 3.11.x
+```
+
+**¿Cómo sé que el entorno está activado?**
+- La terminal debe mostrar: `(futsal) usuario@computadora:~$`
+
+---
+
+## Paso 4️⃣: Instalar Dependencias
+
+```bash
+# Asegurar que estés en el entorno 'futsal'
+mamba activate futsal
+
+# Instalar dependencias (mucho más rápido con Mamba)
+mamba install -c conda-forge ultralytics opencv numpy pandas matplotlib -y
+```
+
+**Tiempo estimado:** 30-60 segundos (con Mamba)
+
+---
+
+## Paso 5️⃣: Verificar Instalación
+
+```bash
+# Verificar que todo funciona
+python -c "from ultralytics import YOLO; print('✓ YOLOv8 OK')"
+python -c "import cv2; print(f'✓ OpenCV {cv2.__version__} OK')"
+python -c "import numpy; print('✓ NumPy OK')"
+```
+
+**Esperado:** 3 líneas que dicen ✓ ... OK
+
+---
+
+## ✅ SETUP COMPLETADO
+
+Si llegaste hasta aquí, estás listo para el tutorial. 
+
+**Recuerda:**
+- Siempre activa el entorno: `mamba activate futsal`
+- Puedes desactivar con: `mamba deactivate`
+- Para ver entornos disponibles: `mamba env list`
+
+---
+
+## 📋 Tabla de Contenidos del Tutorial
 
 1. [Módulo 1: GitHub](#módulo-1-github--acceso-a-los-archivos)
 2. [Módulo 2: SLURM Serial](#módulo-2-fundamentos-slurm---trabajo-serial)
