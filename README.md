@@ -60,7 +60,7 @@ Para profundizar en las técnicas utilizadas en este proyecto, se recomiendan lo
 ### Software Requerido
 
 - **Python:** 3.9+ (recomendado 3.11)
-- **Conda:** Miniconda o Anaconda
+- **Mamba/Conda:** Miniforge3 (recomendado en UCR) o Miniconda
 - **Git:** 2.25+
 - **SSH:** Para acceso al cluster (opcional)
 
@@ -85,22 +85,57 @@ VPN: acceso.ucr.ac.cr (si es remoto)
 
 ## 🔧 Instalación y Configuración
 
-### Paso 1: Instalar Conda (si no lo tienes)
+> 📌 **Nota sobre Mamba:** Miniforge3 incluye **Mamba**, que es un reemplazo más rápido y eficiente de Conda. Todos los comandos `mamba` funcionan exactamente como `conda`. Si instalas Miniforge3, usa `mamba` en lugar de `conda` para instalar paquetes (es 10-50x más rápido).
 
-#### Opción A: Miniconda (recomendado - ligero)
+### Paso 1: Instalar Mamba/Conda
+
+#### Opción A: Miniforge3 (⭐ RECOMENDADO EN UCR)
+
+Miniforge3 incluye **Mamba**, que es más rápido que Conda.
 
 ```bash
-# Descargar Miniconda
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+# Descargar Miniforge3
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
 
 # Instalar
-bash Miniconda3-latest-Linux-x86_64.sh
+bash Miniforge3-Linux-x86_64.sh
+
+# Aceptar términos cuando se pida
+# Seleccionar ubicación (por defecto: ~/miniforge3)
 
 # Reiniciar terminal o ejecutar
 source ~/.bashrc
 ```
 
-#### Opción B: Anaconda (completo)
+**Verificar instalación:**
+```bash
+mamba --version
+conda --version
+```
+
+#### Opción B: Usar Script Oficial de UCR
+
+UCR proporciona un script de instalación automática:
+
+```bash
+# Descargar el script de UCR
+wget https://git.ucr.ac.cr/hpc/scripts-instalacion/-/raw/main/miniforge3_install.sh
+
+# Ejecutar
+bash miniforge3_install.sh
+
+# Sigue las instrucciones del script
+```
+
+#### Opción C: Miniconda (alternativa ligera)
+
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+source ~/.bashrc
+```
+
+#### Opción D: Anaconda (completo pero pesado)
 
 ```bash
 wget https://repo.anaconda.com/archive/Anaconda3-2024.02-Linux-x86_64.sh
@@ -108,9 +143,15 @@ bash Anaconda3-2024.02-Linux-x86_64.sh
 source ~/.bashrc
 ```
 
-**Verificar instalación:**
+**Después de cualquier instalación:**
 ```bash
-conda --version
+# Reiniciar terminal o ejecutar
+bash
+
+# Verificar
+mamba --version  # Si usaste Miniforge3
+# o
+conda --version  # Si usaste Miniconda/Anaconda
 ```
 
 ---
@@ -124,21 +165,31 @@ cd Futsal-UCR-Vision-computacional
 
 ---
 
-### Paso 3: Crear Entorno Conda
+### Paso 3: Crear Entorno Conda/Mamba
 
-#### Opción A: Crear entorno desde cero
+#### Opción A: Crear entorno desde cero (⭐ RECOMENDADO)
 
 ```bash
-# Crear entorno con Python 3.11
+# Si tienes Miniforge3/Mamba (más rápido)
+mamba create -n futsal python=3.11 -y
+
+# O si tienes Conda/Miniconda
 conda create -n futsal python=3.11 -y
 
 # Activar entorno
+mamba activate futsal
+# o
 conda activate futsal
 ```
 
 #### Opción B: Crear desde archivo (si existe environment.yml)
 
 ```bash
+# Con Mamba
+mamba env create -f environment.yml
+mamba activate futsal
+
+# O con Conda
 conda env create -f environment.yml
 conda activate futsal
 ```
@@ -147,16 +198,28 @@ conda activate futsal
 ```bash
 python --version  # Debe mostrar Python 3.11.x
 which python      # Debe mostrar ruta del entorno
+echo $CONDA_PREFIX # Verifica que estés en futsal
 ```
 
 ---
 
 ### Paso 4: Instalar Dependencias
 
+**Asegúrate de que el entorno `futsal` esté activado:**
+```bash
+mamba activate futsal  # o conda activate futsal
+```
+
 #### Dependencias Base (obligatorias)
 
 ```bash
+# Actualizar pip
 pip install --upgrade pip
+
+# Opción A: Con Mamba (más rápido) ⭐
+mamba install -c conda-forge ultralytics opencv numpy pandas matplotlib
+
+# Opción B: Con pip (alternativa)
 pip install ultralytics opencv-python numpy pandas matplotlib
 ```
 
@@ -249,11 +312,13 @@ git clone https://github.com/tomas0821/Futsal-UCR-Vision-computacional
 cd Futsal-UCR-Vision-computacional
 
 # 2. Crear y activar entorno
-conda create -n futsal python=3.11 -y
-conda activate futsal
+mamba create -n futsal python=3.11 -y
+mamba activate futsal
+# (o usa conda si no tienes mamba)
 
-# 3. Instalar dependencias
-pip install ultralytics opencv-python torch torchvision
+# 3. Instalar dependencias (mamba es más rápido)
+mamba install -c conda-forge ultralytics opencv numpy torch torchvision
+# (o usa: pip install ultralytics opencv-python torch torchvision)
 
 # 4. Leer el tutorial
 cat README_TUTORIAL.md
