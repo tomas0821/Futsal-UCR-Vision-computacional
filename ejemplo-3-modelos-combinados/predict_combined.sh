@@ -10,13 +10,10 @@
 #SBATCH --output=combined_predict_%j.log
 #SBATCH --error=combined_predict_%j.err
 
-# Cargar el entorno de conda
 CONDA_PATH=$(conda info --base)
 source $CONDA_PATH/etc/profile.d/conda.sh
 conda activate futsal_env
 
-# Navegar al directorio del Ejemplo 3
-cd /home/tomas.rojas_s/futsal/ejemplo-3-modelos-combinados
+cd "$(dirname "$(realpath "$0")")" 
 
-# Ejecutar el script de combinación
 python combined_inference.py

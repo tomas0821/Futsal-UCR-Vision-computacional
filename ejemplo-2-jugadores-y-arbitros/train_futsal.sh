@@ -16,7 +16,7 @@ source $CONDA_PATH/etc/profile.d/conda.sh
 conda activate futsal_env
 
 # Navegar al directorio del Ejemplo 2
-cd /home/tomas.rojas_s/futsal/ejemplo-2-jugadores-y-arbitros
+cd "$(dirname "$(realpath "$0")")" 
 
 # Paso 1: Descargar y Filtrar (ya lo hicimos manualmente, pero lo dejamos por si acaso)
 # python download_dataset.py

@@ -16,7 +16,7 @@ source $CONDA_PATH/etc/profile.d/conda.sh
 conda activate futsal_env
 
 # Navegar al directorio del proyecto (Ejemplo 1)
-cd /home/tomas.rojas_s/futsal/ejemplo-1-deteccion-basica
+cd "$(dirname "$(realpath "$0")")" 
 
 # Paso 1: Descargar el dataset (si no se ha hecho antes)
 python download_dataset.py

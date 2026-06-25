@@ -16,7 +16,7 @@ source $CONDA_PATH/etc/profile.d/conda.sh
 conda activate futsal_env
 
 # Navegar al directorio del Ejemplo 4
-cd /home/tomas.rojas_s/futsal/ejemplo-4-deteccion-cancha-keypoints
+cd "$(dirname "$(realpath "$0")")" 
 
 # Iniciar el entrenamiento de keypoints
 python train.py
