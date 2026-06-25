@@ -29,3 +29,7 @@
 
 # Ignorar el resto de archivos .pt
 **/*.pt
+
+# Archivos de configuración de Claude Code
+CLAUDE.md
+00_Master_Notebook.md
