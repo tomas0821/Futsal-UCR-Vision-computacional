@@ -2,7 +2,7 @@
 
 Sistema desarrollado en la Universidad de Costa Rica para analizar partidos de futsal a partir de **una sola cámara fija 4K**. Detecta balón, jugadores, porteros y árbitros con YOLOv8, los sigue en el tiempo, los proyecta a la cancha en metros y produce estadísticas del partido: posesión, tiros, goles, mapas de calor y distancia recorrida.
 
-El repositorio está organizado como una guía para estudiantes asistentes e investigadores: cada carpeta `ejemplo-N` es un experimento completo y reproducible en el clúster de la UCR, y `analisis-partido/` contiene el procesamiento posterior que convierte las detecciones en estadísticas.
+El repositorio presenta los métodos y los resultados del proyecto: cada carpeta `ejemplo-N` es un experimento de entrenamiento o inferencia reproducible en el clúster de la UCR, y `analisis-partido/` contiene el procesamiento posterior que convierte las detecciones en estadísticas.
 
 ![Detección de personas en el primer tiempo San Ramón vs Grecia](docs/figuras/deteccion_personas.jpg)
 
@@ -70,12 +70,10 @@ El gol de Grecia (minuto 10:42) no se detectó porque San Ramón reinició el ju
 | [ejemplo-4-deteccion-cancha-keypoints](ejemplo-4-deteccion-cancha-keypoints/) | Puntos clave de la cancha con YOLOv8-pose. |
 | [ejemplo-5-grecia](ejemplo-5-grecia/) | Modelo unificado de cuatro clases, seguimiento con BotSort y pase de balón en 4K. Es el modelo en uso. |
 | [analisis-partido](analisis-partido/) | Calibración de la cámara, equipos, identidades, trayectoria del balón, analítica y visualización. |
-| [docs](docs/) | Pipeline, resultados, instalación, figuras y los CSV del primer tiempo analizado. |
-| [tutorial](tutorial/) y [README_TUTORIAL.md](README_TUTORIAL.md) | Uso del clúster de la UCR: GitHub, SLURM, GPU. |
-| [practica_deteccion_jugadores.md](practica_deteccion_jugadores.md) | Práctica guiada para estudiantes: entrenar y evaluar el detector de personas. |
+| [docs](docs/) | Pipeline, resultados, figuras y los CSV del primer tiempo analizado. |
 | [analisis-bibliografico](analisis-bibliografico/) | Estado del arte en visión por computadora deportiva. |
 
-## Empezar
+## Reproducir
 
 ```bash
 git clone https://github.com/tomas0821/Futsal-UCR-Vision-computacional
@@ -85,11 +83,7 @@ conda activate futsal_env
 cp ejemplo-1-deteccion-basica/.env.example ejemplo-1-deteccion-basica/.env   # y escribir la clave de Roboflow
 ```
 
-En el clúster, cada ejemplo se ejecuta desde su carpeta con `python download_dataset.py` y `sbatch train_futsal.sh`; la inferencia con `sbatch predict_futsal.sh videos/clip.mp4`. Los trabajos de GPU siempre van por SLURM, nunca en el nodo de acceso.
-
-- Instalación paso a paso y solución de problemas: [docs/instalacion.md](docs/instalacion.md).
-- Primer contacto con el clúster: [README_TUTORIAL.md](README_TUTORIAL.md).
-- Primera práctica: [practica_deteccion_jugadores.md](practica_deteccion_jugadores.md).
+Entorno probado: Python 3.11, Ultralytics 8.4, PyTorch con CUDA, una GPU A100 por trabajo. Cada ejemplo se ejecuta desde su carpeta: `python download_dataset.py`, `sbatch train_futsal.sh` y `sbatch predict_futsal.sh videos/clip.mp4`. Los trabajos de GPU van por SLURM. El posprocesamiento de `analisis-partido/` corre en CPU en cualquier máquina; los comandos están en [docs/pipeline.md](docs/pipeline.md).
 
 ## Datasets
 
