@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pitch Landmark Clicker</title>
+<style>
+  :root{--bg:#f4f4f1;--panel:#ffffff;--ink:#1e1e1c;--muted:#6b6b66;--line:#d9d9d3;--accent:#2a78d6;--done:#1baf7a;--skip:#b8b8b0;--warn:#eb6834}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;height:100vh;display:flex;flex-direction:column}
+  header{padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  header h1{font-size:16px;margin:0 12px 0 0}
+  header label{color:var(--muted);font-size:12px}
+  header input[type=text],header input[type=number]{padding:4px 6px;border:1px solid var(--line);border-radius:4px;font:inherit;width:90px}
+  header input[type=text]{width:180px}
+  button{padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font:inherit;cursor:pointer}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  button:disabled{opacity:.5;cursor:default}
+  main{flex:1;display:grid;grid-template-columns:320px 1fr;min-height:0}
+  aside{border-right:1px solid var(--line);background:var(--panel);overflow:auto;padding:10px}
+  aside .hint{color:var(--muted);font-size:12px;margin:0 0 10px}
+  ol{list-style:none;margin:0;padding:0}
+  li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;border:1px solid transparent}
+  li.active{border-color:var(--accent);background:#eef4fd}
+  li .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--skip);display:inline-block}
+  li.done .dot{background:var(--done);border-color:var(--done)}
+  li.skipped .dot{background:var(--skip)}
+  li .name{font-weight:600;font-size:13px}
+  li .desc{color:var(--muted);font-size:11px}
+  li .px{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+  #stage{position:relative;overflow:hidden;background:#222;cursor:crosshair}
+  canvas{display:block;position:absolute;left:0;top:0}
+  #drop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:16px;text-align:center;padding:40px;pointer-events:none}
+  #loupe{position:absolute;width:180px;height:180px;border:2px solid #fff;border-radius:50%;pointer-events:none;display:none;box-shadow:0 2px 12px rgba(0,0,0,.5);overflow:hidden;background:#000}
+  #loupe canvas{position:absolute;left:0;top:0}
+  #status{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.6);color:#fff;padding:4px 8px;border-radius:4px;font-size:12px;pointer-events:none}
+  @media (max-width:800px){main{grid-template-columns:1fr}aside{max-height:35vh;border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Pitch landmark clicker</h1>
+  <label>Match <input id="match" type="text" placeholder="e.g. caribe_2026-05-16"></label>
+  <label>Length m <input id="L" type="number" step="0.01" value="37.19"></label>
+  <label>Width m <input id="W" type="number" step="0.01" value="17.2"></label>
+  <label>Goal width <input id="GW" type="number" step="0.01" value="3"></label>
+  <label>Goal height <input id="GH" type="number" step="0.01" value="2"></label>
+  <input id="file" type="file" accept="image/*" style="display:none">
+  <button id="openBtn">Open frame…</button>
+  <input id="jsonfile" type="file" accept="application/json" style="display:none">
+  <button id="loadBtn">Load JSON…</button>
+  <button id="skipBtn">Skip (not visible)</button>
+  <button id="undoBtn">Clear point</button>
+  <button id="dlBtn" class="primary">Download JSON</button>
+</header>
+<main>
+  <aside>
+    <p class="hint">Click each landmark on the frame. Scroll to zoom, drag with the right button (or hold Space) to pan. The magnifier shows the exact pixel. Skip anything outside the frame or hidden. Post bases = where the front posts meet the floor; crossbar ends = top of the same posts.</p>
+    <ol id="list"></ol>
+  </aside>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="drop">Drop a frame image here<br><small>(upright 4K frame from the match; any size works)</small></div>
+    <div id="loupe"><canvas id="lc" width="180" height="180"></canvas></div>
+    <div id="status"></div>
+  </div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function landmarks(){
+  const L=+$('L').value,W=+$('W').value,gw=+$('GW').value,gh=+$('GH').value,y1=W/2-gw/2,y2=W/2+gw/2;
+  return [
+    {id:'FL',name:'Far-left corner',desc:'far touchline meets left goal line',X:0,Y:0,Z:0},
+    {id:'FR',name:'Far-right corner',desc:'far touchline meets right goal line',X:L,Y:0,Z:0},
+    {id:'NR',name:'Near-right corner',desc:'near touchline meets right goal line',X:L,Y:W,Z:0},
+    {id:'NL',name:'Near-left corner',desc:'near touchline meets left goal line',X:0,Y:W,Z:0},
+    {id:'CT',name:'Centre line, far end',desc:'where it meets the far touchline',X:L/2,Y:0,Z:0},
+    {id:'CB',name:'Centre line, near end',desc:'where it meets the near touchline',X:L/2,Y:W,Z:0},
+    {id:'CCF',name:'Centre circle, far crossing',desc:'circle crosses the centre line, far side',X:L/2,Y:W/2-3,Z:0},
+    {id:'CCN',name:'Centre circle, near crossing',desc:'circle crosses the centre line, near side',X:L/2,Y:W/2+3,Z:0},
+    {id:'LPF',name:'Left goal, far post base',desc:'front post, at the floor',X:0,Y:y1,Z:0},
+    {id:'LPN',name:'Left goal, near post base',desc:'front post, at the floor',X:0,Y:y2,Z:0},
+    {id:'LCF',name:'Left goal, far crossbar end',desc:'top of the far front post',X:0,Y:y1,Z:gh},
+    {id:'LCN',name:'Left goal, near crossbar end',desc:'top of the near front post',X:0,Y:y2,Z:gh},
+    {id:'RPF',name:'Right goal, far post base',desc:'front post, at the floor',X:L,Y:y1,Z:0},
+    {id:'RPN',name:'Right goal, near post base',desc:'front post, at the floor',X:L,Y:y2,Z:0},
+    {id:'RCF',name:'Right goal, far crossbar end',desc:'top of the far front post',X:L,Y:y1,Z:gh},
+    {id:'RCN',name:'Right goal, near crossbar end',desc:'top of the near front post',X:L,Y:y2,Z:gh},
+    {id:'LPA1',name:'Left penalty area, far corner (optional)',desc:'6 m line meets the far arc',X:6,Y:y1,Z:0},
+    {id:'LPA2',name:'Left penalty area, near corner (optional)',desc:'6 m line meets the near arc',X:6,Y:y2,Z:0},
+    {id:'RPA1',name:'Right penalty area, far corner (optional)',desc:'6 m line meets the far arc',X:L-6,Y:y1,Z:0},
+    {id:'RPA2',name:'Right penalty area, near corner (optional)',desc:'6 m line meets the near arc',X:L-6,Y:y2,Z:0},
+    {id:'LPM',name:'Left penalty mark (optional)',desc:'6 m spot',X:6,Y:W/2,Z:0},
+    {id:'RPM',name:'Right penalty mark (optional)',desc:'6 m spot',X:L-6,Y:W/2,Z:0},
+  ];
+}
+let LM=landmarks(), pts={}, skipped={}, active=0, img=null, imgName='', scale=1, ox=0, oy=0, panning=false, space=false, last=null;
+const cv=$('cv'), ctx=cv.getContext('2d'), stage=$('stage'), loupe=$('loupe'), lc=$('lc').getContext('2d');
+function renderList(){
+  const ol=$('list'); ol.innerHTML='';
+  LM.forEach((m,i)=>{
+    const li=document.createElement('li'); li.className=(i===active?'active ':'')+(pts[m.id]?'done':skipped[m.id]?'skipped':'');
+    const p=pts[m.id]; li.innerHTML=`<span class="dot"></span><div><div class="name">${i+1}. ${m.name}</div><div class="desc">${m.desc} · (${m.X.toFixed(2)}, ${m.Y.toFixed(2)}, ${m.Z}) m</div></div><span class="px">${p?`${p.u.toFixed(0)},${p.v.toFixed(0)}`:skipped[m.id]?'skipped':''}</span>`;
+    li.onclick=()=>{active=i;renderList();};
+    ol.appendChild(li);
+  });
+  const n=Object.keys(pts).length; $('status').textContent=img?`${imgName} ${img.naturalWidth}×${img.naturalHeight} · ${n} points · zoom ${(scale*100).toFixed(0)}%`:'';
+}
+function fit(){ if(!img)return; const r=stage.getBoundingClientRect(); cv.width=r.width; cv.height=r.height; scale=Math.min(r.width/img.naturalWidth,r.height/img.naturalHeight); ox=(r.width-img.naturalWidth*scale)/2; oy=(r.height-img.naturalHeight*scale)/2; draw(); }
+function draw(){
+  if(!img)return; ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.setTransform(scale,0,0,scale,ox,oy); ctx.imageSmoothingEnabled=scale<1; ctx.drawImage(img,0,0);
+  const r=6/scale; ctx.lineWidth=2/scale; ctx.font=`${13/scale}px system-ui`;
+  LM.forEach((m,i)=>{ const p=pts[m.id]; if(!p)return; ctx.strokeStyle=i===active?'#ffd400':'#1baf7a'; ctx.beginPath(); ctx.moveTo(p.u-r*2,p.v); ctx.lineTo(p.u+r*2,p.v); ctx.moveTo(p.u,p.v-r*2); ctx.lineTo(p.u,p.v+r*2); ctx.stroke(); ctx.beginPath(); ctx.arc(p.u,p.v,r,0,7); ctx.stroke(); ctx.fillStyle='#fff'; ctx.strokeStyle='rgba(0,0,0,.7)'; ctx.lineWidth=3/scale; ctx.strokeText(m.id,p.u+r*1.5,p.v-r*1.5); ctx.fillText(m.id,p.u+r*1.5,p.v-r*1.5); ctx.lineWidth=2/scale; });
+  renderList();
+}
+function toImg(e){ const r=cv.getBoundingClientRect(); return {u:(e.clientX-r.left-ox)/scale, v:(e.clientY-r.top-oy)/scale}; }
+stage.addEventListener('wheel',e=>{ if(!img)return; e.preventDefault(); const p=toImg(e); const f=Math.exp(-e.deltaY*0.0015); const ns=Math.max(0.05,Math.min(20,scale*f)); const r=cv.getBoundingClientRect(); ox=(e.clientX-r.left)-p.u*ns; oy=(e.clientY-r.top)-p.v*ns; scale=ns; draw(); showLoupe(e); },{passive:false});
+stage.addEventListener('contextmenu',e=>e.preventDefault());
+stage.addEventListener('mousedown',e=>{ if(e.button===2||space){panning=true;last={x:e.clientX,y:e.clientY};} });
+window.addEventListener('mouseup',e=>{ if(panning){panning=false;return;} });
+stage.addEventListener('mousemove',e=>{ if(panning){ox+=e.clientX-last.x;oy+=e.clientY-last.y;last={x:e.clientX,y:e.clientY};draw();} showLoupe(e); });
+stage.addEventListener('mouseleave',()=>loupe.style.display='none');
+stage.addEventListener('click',e=>{ if(!img||space||e.button!==0)return; const p=toImg(e); if(p.u<0||p.v<0||p.u>img.naturalWidth||p.v>img.naturalHeight)return; const m=LM[active]; pts[m.id]={u:+p.u.toFixed(1),v:+p.v.toFixed(1)}; delete skipped[m.id]; if(active<LM.length-1)active++; draw(); });
+window.addEventListener('keydown',e=>{ if(e.code==='Space'){space=true;stage.style.cursor='grab';e.preventDefault();} if(e.key==='s'||e.key==='S')$('skipBtn').click(); if(e.key==='Backspace'||e.key==='Delete')$('undoBtn').click(); if(e.key==='ArrowDown'){active=Math.min(LM.length-1,active+1);renderList();} if(e.key==='ArrowUp'){active=Math.max(0,active-1);renderList();} });
+window.addEventListener('keyup',e=>{ if(e.code==='Space'){space=false;stage.style.cursor='crosshair';} });
+function showLoupe(e){ if(!img)return; const p=toImg(e); if(p.u<0||p.v<0||p.u>img.naturalWidth||p.v>img.naturalHeight){loupe.style.display='none';return;} const r=stage.getBoundingClientRect(); loupe.style.display='block'; loupe.style.left=(e.clientX-r.left+24)+'px'; loupe.style.top=(e.clientY-r.top-204)+'px'; const z=6, s=180/z; lc.imageSmoothingEnabled=false; lc.clearRect(0,0,180,180); lc.drawImage(img,p.u-s/2,p.v-s/2,s,s,0,0,180,180); lc.strokeStyle='#ff2a2a'; lc.lineWidth=1; lc.beginPath(); lc.moveTo(90,0);lc.lineTo(90,80);lc.moveTo(90,100);lc.lineTo(90,180);lc.moveTo(0,90);lc.lineTo(80,90);lc.moveTo(100,90);lc.lineTo(180,90); lc.stroke(); }
+function loadImage(file){ const url=URL.createObjectURL(file); const im=new Image(); im.onload=()=>{img=im;imgName=file.name;$('drop').style.display='none';fit();}; im.src=url; }
+$('openBtn').onclick=()=>$('file').click(); $('file').onchange=e=>{ if(e.target.files[0])loadImage(e.target.files[0]); };
+stage.addEventListener('dragover',e=>e.preventDefault()); stage.addEventListener('drop',e=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; if(!f)return; if(f.type.startsWith('image/'))loadImage(f); else if(f.name.endsWith('.json'))f.text().then(loadJSON); });
+$('skipBtn').onclick=()=>{ const m=LM[active]; delete pts[m.id]; skipped[m.id]=true; if(active<LM.length-1)active++; draw(); };
+$('undoBtn').onclick=()=>{ const m=LM[active]; delete pts[m.id]; delete skipped[m.id]; draw(); };
+['L','W','GW','GH'].forEach(id=>$(id).addEventListener('change',()=>{LM=landmarks();draw();}));
+function loadJSON(txt){ const j=JSON.parse(txt); if(j.pitch){$('L').value=j.pitch.length_m;$('W').value=j.pitch.width_m;} if(j.goal){$('GW').value=j.goal.width_m;$('GH').value=j.goal.height_m;} if(j.match)$('match').value=j.match; LM=landmarks(); pts={}; skipped={}; (j.points||[]).forEach(p=>{ if(p.u!=null)pts[p.id]={u:p.u,v:p.v}; else skipped[p.id]=true; }); draw(); }
+$('loadBtn').onclick=()=>$('jsonfile').click(); $('jsonfile').onchange=e=>{ const f=e.target.files[0]; if(f)f.text().then(loadJSON); };
+$('dlBtn').onclick=()=>{ const j={match:$('match').value||'match',created:new Date().toISOString(),image:img?{name:imgName,width:img.naturalWidth,height:img.naturalHeight}:null,pitch:{length_m:+$('L').value,width_m:+$('W').value,frame:'X along far touchline from left goal line; Y from far touchline toward camera; Z up'},goal:{width_m:+$('GW').value,height_m:+$('GH').value},points:LM.map(m=>({id:m.id,name:m.name,X:m.X,Y:m.Y,Z:m.Z,u:pts[m.id]?pts[m.id].u:null,v:pts[m.id]?pts[m.id].v:null}))}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(j,null,1)],{type:'application/json'})); a.download=`${j.match}_landmarks.json`; a.click(); };
+window.addEventListener('resize',fit); renderList();
+</script>
+</body>
+</html>

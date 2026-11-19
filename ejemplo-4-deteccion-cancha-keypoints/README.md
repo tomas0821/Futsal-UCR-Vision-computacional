@@ -31,3 +31,6 @@ En este clip se puede observar la estructura de los 10 puntos clave detectados e
 https://github.com/tomas0821/Futsal-UCR-Vision-computacional/raw/master/ejemplo-4-deteccion-cancha-keypoints/demo_cancha.mp4
 
 > **Nota importante:** Debido al tamaño limitado del dataset (20 imágenes), el modelo puede presentar falsos positivos en estructuras similares del techo. Se recomienda ampliar el dataset para mayor robustez.
+
+## 📦 Pesos entrenados
+Los pesos `best.pt` no se guardan en git; se descargan de la página de [Releases](https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases) (archivo `ejemplo4_cancha_yolov8m-pose_mAP50-99p5.pt`) y se colocan en `runs/pose/futsal_pitch_detection/yolov8m_pitch_field3/weights/best.pt`.
