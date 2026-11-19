@@ -1,438 +1,115 @@
-# Futsal Analysis Project - UCR
+# Futsal UCR: análisis de partidos con visión por computadora
 
-Este repositorio es una guía técnica y un catálogo de ejemplos para el análisis de video en futsal utilizando Inteligencia Artificial. Está diseñado para ser utilizado por estudiantes asistentes e investigadores.
+Sistema desarrollado en la Universidad de Costa Rica para analizar partidos de futsal a partir de **una sola cámara fija 4K**. Detecta balón, jugadores, porteros y árbitros con YOLOv8, los sigue en el tiempo, los proyecta a la cancha en metros y produce estadísticas del partido: posesión, tiros, goles, mapas de calor y distancia recorrida.
 
----
+El repositorio está organizado como una guía para estudiantes asistentes e investigadores: cada carpeta `ejemplo-N` es un experimento completo y reproducible en el clúster de la UCR, y `analisis-partido/` contiene el procesamiento posterior que convierte las detecciones en estadísticas.
 
-## 🎓 Tutorial: Cálculos en el Cluster UCR
+![Detección de personas en el primer tiempo San Ramón vs Grecia](docs/figuras/deteccion_personas.jpg)
 
-**¡NUEVO!** Aprende a ejecutar análisis de futsal en el cluster UCR con GPU.
+*Primer tiempo San Ramón vs Grecia (9 de mayo de 2026), minutos 07:18 y 15:27: 4 + 4 jugadores de campo, dos porteros y el árbitro, cada uno con su identidad y equipo.*
 
-### 📚 [Ver Tutorial Completo →](./README_TUTORIAL.md)
+## Cómo funciona
 
-**Módulos disponibles:**
-1. **GitHub** - Acceso a archivos y clonación
-2. **SLURM Serial** - Ejecutar trabajos en la partición serial
-3. **GPU** - Acelerar cálculos con GPU
-4. **Git Avanzado** - Branches, merge y colaboración
+```mermaid
+flowchart LR
+    V[Video 4K<br>cámara fija] --> P[Pase de personas<br>YOLOv8m 1280 px + BotSort]
+    V --> B[Pase de balón<br>YOLOv8m 2560 px, 4K completo]
+    V --> C[Calibración de la lente<br>imagen → cancha en metros]
+    P --> T[Equipo por color<br>de camiseta]
+    T --> I[Identidades<br>enlace de pistas]
+    I --> A[Analítica del partido]
+    B --> A
+    C --> A
+    A --> R[Posesión · tiros · goles<br>mapas de calor · distancias]
+```
 
-**Archivos de ejemplo en `tutorial/`:**
-- `ejemplo_serial.sh` - Script básico para SLURM
-- `ejemplo_gpu.sh` - Script con GPU
-- `simple_script.py` - Python para trabajo serial
-- `script_con_gpu.py` - Python con GPU (PyTorch/TensorFlow)
+1. **Detección.** Un solo modelo YOLOv8m (`grecia-v7`) con cuatro clases: `bola`, `juga`, `port`, `ref`. Las personas se detectan sobre el video a 1080p; el balón, de unos 15 px en 4K, necesita un pase aparte sobre el video 4K completo a 2560 px.
+2. **Seguimiento.** BotSort ajustado para cámara fija (memoria de 3 s, sin compensación de movimiento). Cada pista recibe un equipo por el color de la camiseta y las pistas se enlazan en identidades por equipo.
+3. **Calibración.** Un modelo de lente ojo de pez ajustado con unos 15 puntos de la cancha marcados a mano en un cuadro; convierte píxeles en metros con un error de medio metro aproximadamente.
+4. **Analítica.** Posesión por cercanía al balón, tiros por velocidad y dirección del balón, goles por la formación de saque de centro que sigue a cada gol, mapas de calor y distancia por identidad.
 
-**Duración total:** ~45 minutos
+La descripción completa de cada etapa, con los comandos y los formatos de datos, está en [docs/pipeline.md](docs/pipeline.md).
 
----
+## Modelos entrenados
 
-## 📂 Catálogo de Ejemplos
+| Modelo | Tarea | Dataset (Roboflow `football-ucr`) | mAP50 | mAP50-95 | Carpeta |
+| :--- | :--- | :--- | ---: | ---: | :--- |
+| **grecia-v7** YOLOv8m, 1280 px | balón + jugadores + porteros + árbitros | `grecia` v7: 2 274 imágenes de 4 partidos | **83.3** | **46.8** | [ejemplo-5-grecia](ejemplo-5-grecia/) |
+| ejemplo-2 YOLOv8m | porteros, jugadores, árbitros | `futsal-ucr` v8 | 96.3 | 62.9 | [ejemplo-2](ejemplo-2-jugadores-y-arbitros/) |
+| ejemplo-1 YOLOv8m | balón | `ucr-futsal-ball2` v6 | 93.0 | 60.9 | [ejemplo-1](ejemplo-1-deteccion-basica/) |
+| ejemplo-4 YOLOv8m-pose | 10 puntos clave de la cancha | `ucr-futsal-field3` v3 | 99.5 | 98.2 | [ejemplo-4](ejemplo-4-deteccion-cancha-keypoints/) |
 
-| Ejemplo | Descripción | Modelo | Estado |
+Los mAP de distintos datasets no se comparan entre sí: los modelos de los ejemplos 1 y 2 se midieron en sus propios datos, con cámaras más cercanas. Sobre el video 4K de la cámara fija, el detector de balón del ejemplo 1 encuentra el balón en el 18 % de los cuadros; `grecia-v7` a 2560 px, en el 62 % del primer tiempo completo y el 71 % del clip de prueba. Las tablas completas, incluida la comparación sobre el video real, están en [docs/resultados.md](docs/resultados.md).
+
+Los pesos (`.pt`) no viven en el repositorio: se descargan desde la página de [Releases](https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases).
+
+## Un primer tiempo analizado de principio a fin
+
+Primer tiempo San Ramón vs Grecia, 27 minutos, 82 252 cuadros procesados sin intervención manual.
+
+| | San Ramón | Grecia |
+| :--- | ---: | ---: |
+| Goles detectados (resultado real 3 – 1) | 3 | 0 |
+| Posesión | 26 % | 74 % |
+| Tiros / a puerta | 5 / 1 | 9 / 3 |
+
+<p>
+<img src="docs/figuras/mapa_tiros_1T.png" width="49%" alt="Mapa de tiros del primer tiempo">
+<img src="docs/figuras/mapas_calor_1T.png" width="49%" alt="Mapas de calor por equipo">
+</p>
+
+El gol de Grecia (minuto 10:42) no se detectó porque San Ramón reinició el juego en diez segundos, sin la formación de saque de centro que el detector busca. Las distancias por jugador que produce la versión actual de `match_analytics.py` están infladas alrededor de un tercio por el temblor cuadro a cuadro del rastreo; el valor corregido ronda los 95 a 100 m/min por jugador de campo. El detalle está en [docs/resultados.md](docs/resultados.md#distancias-y-velocidades).
+
+## Estructura del repositorio
+
+| Carpeta | Contenido |
+| :--- | :--- |
+| [ejemplo-1-deteccion-basica](ejemplo-1-deteccion-basica/) | Entrenamiento e inferencia de un detector de balón (YOLOv8n vs YOLOv8m). |
+| [ejemplo-2-jugadores-y-arbitros](ejemplo-2-jugadores-y-arbitros/) | Detector de personas en tres clases, con filtrado del dataset. |
+| [ejemplo-3-modelos-combinados](ejemplo-3-modelos-combinados/) | Inferencia simultánea con dos modelos sobre un video. |
+| [ejemplo-4-deteccion-cancha-keypoints](ejemplo-4-deteccion-cancha-keypoints/) | Puntos clave de la cancha con YOLOv8-pose. |
+| [ejemplo-5-grecia](ejemplo-5-grecia/) | Modelo unificado de cuatro clases, seguimiento con BotSort y pase de balón en 4K. Es el modelo en uso. |
+| [analisis-partido](analisis-partido/) | Calibración de la cámara, equipos, identidades, trayectoria del balón, analítica y visualización. |
+| [docs](docs/) | Pipeline, resultados, instalación, figuras y los CSV del primer tiempo analizado. |
+| [tutorial](tutorial/) y [README_TUTORIAL.md](README_TUTORIAL.md) | Uso del clúster de la UCR: GitHub, SLURM, GPU. |
+| [practica_deteccion_jugadores.md](practica_deteccion_jugadores.md) | Práctica guiada para estudiantes: entrenar y evaluar el detector de personas. |
+| [analisis-bibliografico](analisis-bibliografico/) | Estado del arte en visión por computadora deportiva. |
+
+## Empezar
+
+```bash
+git clone https://github.com/tomas0821/Futsal-UCR-Vision-computacional
+cd Futsal-UCR-Vision-computacional
+conda env create -f environment.yml      # o: pip install -r requirements.txt
+conda activate futsal_env
+cp ejemplo-1-deteccion-basica/.env.example ejemplo-1-deteccion-basica/.env   # y escribir la clave de Roboflow
+```
+
+En el clúster, cada ejemplo se ejecuta desde su carpeta con `python download_dataset.py` y `sbatch train_futsal.sh`; la inferencia con `sbatch predict_futsal.sh videos/clip.mp4`. Los trabajos de GPU siempre van por SLURM, nunca en el nodo de acceso.
+
+- Instalación paso a paso y solución de problemas: [docs/instalacion.md](docs/instalacion.md).
+- Primer contacto con el clúster: [README_TUTORIAL.md](README_TUTORIAL.md).
+- Primera práctica: [practica_deteccion_jugadores.md](practica_deteccion_jugadores.md).
+
+## Datasets
+
+| Dataset | Proyecto Roboflow | Versión en uso | Contenido |
 | :--- | :--- | :--- | :--- |
-| **[Ejemplo 1: Detección Básica](./ejemplo-1-deteccion-basica/)** | Entrenamiento de un modelo YOLOv8m para detectar el balón. | YOLOv8m | ✅ Completado |
-| **[Ejemplo 2: Jugadores y Árbitros](./ejemplo-2-jugadores-y-arbitros/)** | Detección multiclase de personas en cancha (excluyendo el balón). | YOLOv8m | ✅ Completado |
-| **[Ejemplo 3: Modelos Combinados](./ejemplo-3-modelos-combinados/)** | Tutorial avanzado: Inferencia simultánea usando múltiples modelos. | Multimodelo | ✅ Completado |
-| **[Ejemplo 4: Keypoints de Cancha](./ejemplo-4-deteccion-cancha-keypoints/)** | Estimación de pose para detectar la geometría y 22 puntos de la cancha. | YOLOv8m-pose | ✅ Completado |
+| Grecia | `football-ucr/grecia` | 7 | 1 291 cuadros 4K de 4 partidos (San Ramón, Grecia, Caribe, Los Chiles), 4 clases, exportados a 1280 × 1280 con duplicado aumentado. |
+| UCR-Futsal-Ball2 | `football-ucr/ucr-futsal-ball2` | 6 | Balón, cámaras cercanas. |
+| Futsal-UCR | `football-ucr/futsal-ucr` | 8 | Porteros, jugadores y árbitros. |
+| ucr-futsal-field3 | `football-ucr/ucr-futsal-field3` | 3 | 10 puntos clave de la cancha. |
 
-## 📖 Documentación de Investigación
+La clave de la API se guarda en `ejemplo-1-deteccion-basica/.env`; los demás ejemplos la leen desde ahí.
 
-*   **[Análisis Bibliográfico](./analisis-bibliografico/):** Investigación técnica realizada por las estudiantes sobre el estado del arte en visión computacional deportiva.
+## Limitaciones conocidas y trabajo futuro
 
-## 📺 Video Tutoriales de Referencia
+- **El balón es el cuello de botella.** Mide unos 7 px en la imagen que ve el modelo; el mAP50 del balón se queda en 60 con cualquier volumen de datos. Pendiente: exportar el dataset a 1920 × 1080 sin estirar, anotar más balones en el aire y lejanos.
+- **Las identidades aún no son dorsales.** Las pistas se enlazan por equipo y continuidad, y duran de 1 a 11 minutos. La lectura de números de camiseta está en `analisis-partido/experimental/`.
+- **Goles con reinicio rápido.** El detector depende de la formación de saque de centro; un reinicio inmediato se pierde.
+- **Distancias.** Hay que suavizar la trayectoria antes de integrar la distancia y calcular la velocidad máxima con ventana de 1 s.
+- **Segundo tiempo y partido completo.** El procesamiento del video (voltear, recodificar, 4K) conviene hacerlo en el clúster; una máquina de escritorio con poca memoria no basta.
 
-Para profundizar en las técnicas utilizadas en este proyecto, se recomiendan los siguientes tutoriales:
+## Autoría
 
-1.  **[YOLOv8 Object Detection Tutorial](https://www.youtube.com/watch?v=aBVGKoNZQUw):** Introducción completa a la arquitectura y entrenamiento.
-2.  **[Advanced Computer Vision for Sports](https://www.youtube.com/watch?v=neBZ6huolkg&t=2140s):** Técnicas avanzadas aplicadas al análisis deportivo y seguimiento.
-
-## 🛠️ Requisitos del Sistema
-
-### Hardware Recomendado
-
-| Componente | Mínimo | Recomendado |
-|-----------|--------|------------|
-| **CPU** | 4 cores | 8+ cores |
-| **RAM** | 8 GB | 16+ GB |
-| **GPU** | CPU Intel/AMD | NVIDIA RTX 3050+ |
-| **Disco** | 50 GB | 200+ GB |
-
-### Software Requerido
-
-- **Python:** 3.9+ (recomendado 3.11)
-- **Mamba/Conda:** Miniforge3 (recomendado en UCR) o Miniconda
-- **Git:** 2.25+
-- **SSH:** Para acceso al cluster (opcional)
-
-### Librerías Principales
-
-| Librería | Versión | Propósito |
-|----------|---------|----------|
-| `ultralytics` | ≥8.0 | YOLOv8/v11 training & inference |
-| `opencv-python` | ≥4.8 | Video processing |
-| `numpy` | ≥1.24 | Numerical operations |
-| `torch` | ≥2.0 | GPU acceleration (opcional) |
-| `roboflow` | ≥1.1 | Dataset management (opcional) |
-
-### Acceso al Cluster (Opcional pero Recomendado)
-
-```
-Host: 172.16.24.2
-Puerto SSH: 22
-Usuario: tu_usuario_ucr
-VPN: acceso.ucr.ac.cr (si es remoto)
-```
-
-## 🔧 Instalación y Configuración
-
-> 📌 **Nota sobre Mamba:** Miniforge3 incluye **Mamba**, que es un reemplazo más rápido y eficiente de Conda. Todos los comandos `mamba` funcionan exactamente como `conda`. Si instalas Miniforge3, usa `mamba` en lugar de `conda` para instalar paquetes (es 10-50x más rápido).
-
-### Paso 1: Instalar Mamba/Conda
-
-#### Opción A: Miniforge3 (⭐ RECOMENDADO EN UCR)
-
-Miniforge3 incluye **Mamba**, que es más rápido que Conda.
-
-```bash
-# Descargar Miniforge3
-wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
-
-# Instalar
-bash Miniforge3-Linux-x86_64.sh
-
-# Aceptar términos cuando se pida
-# Seleccionar ubicación (por defecto: ~/miniforge3)
-
-# Reiniciar terminal o ejecutar
-source ~/.bashrc
-```
-
-**Verificar instalación:**
-```bash
-mamba --version
-conda --version
-```
-
-#### Opción B: Usar Script Oficial de UCR
-
-UCR proporciona un script de instalación automática:
-
-```bash
-# Descargar el script de UCR
-wget https://git.ucr.ac.cr/hpc/scripts-instalacion/-/raw/main/miniforge3_install.sh
-
-# Ejecutar
-bash miniforge3_install.sh
-
-# Sigue las instrucciones del script
-```
-
-#### Opción C: Miniconda (alternativa ligera)
-
-```bash
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-bash Miniconda3-latest-Linux-x86_64.sh
-source ~/.bashrc
-```
-
-#### Opción D: Anaconda (completo pero pesado)
-
-```bash
-wget https://repo.anaconda.com/archive/Anaconda3-2024.02-Linux-x86_64.sh
-bash Anaconda3-2024.02-Linux-x86_64.sh
-source ~/.bashrc
-```
-
-**Después de cualquier instalación:**
-```bash
-# Reiniciar terminal o ejecutar
-bash
-
-# Verificar
-mamba --version  # Si usaste Miniforge3
-# o
-conda --version  # Si usaste Miniconda/Anaconda
-```
-
----
-
-### Paso 2: Clonar el Repositorio
-
-```bash
-git clone https://github.com/tomas0821/Futsal-UCR-Vision-computacional
-cd Futsal-UCR-Vision-computacional
-```
-
----
-
-### Paso 3: Crear Entorno Conda/Mamba
-
-#### Opción A: Crear entorno desde cero (⭐ RECOMENDADO)
-
-```bash
-# Si tienes Miniforge3/Mamba (más rápido)
-mamba create -n futsal python=3.11 -y
-
-# O si tienes Conda/Miniconda
-conda create -n futsal python=3.11 -y
-
-# Activar entorno
-mamba activate futsal
-# o
-conda activate futsal
-```
-
-#### Opción B: Crear desde archivo (si existe environment.yml)
-
-```bash
-# Con Mamba
-mamba env create -f environment.yml
-mamba activate futsal
-
-# O con Conda
-conda env create -f environment.yml
-conda activate futsal
-```
-
-**Verificar activación:**
-```bash
-python --version  # Debe mostrar Python 3.11.x
-which python      # Debe mostrar ruta del entorno
-echo $CONDA_PREFIX # Verifica que estés en futsal
-```
-
----
-
-### Paso 4: Instalar Dependencias
-
-**Asegúrate de que el entorno `futsal` esté activado:**
-```bash
-mamba activate futsal  # o conda activate futsal
-```
-
-#### Dependencias Base (obligatorias)
-
-```bash
-# Actualizar pip
-pip install --upgrade pip
-
-# Opción A: Con Mamba (más rápido) ⭐
-mamba install -c conda-forge ultralytics opencv numpy pandas matplotlib
-
-# Opción B: Con pip (alternativa)
-pip install ultralytics opencv-python numpy pandas matplotlib
-```
-
-#### Para Trabajo con GPU
-
-**PyTorch con CUDA (recomendado):**
-```bash
-# Para GPU NVIDIA (CUDA 12.1)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-
-# Para GPU NVIDIA (CUDA 11.8)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-
-# Solo CPU (si no tienes GPU)
-pip install torch torchvision torchaudio
-```
-
-**O TensorFlow:**
-```bash
-pip install tensorflow[and-cuda]  # Con GPU
-# o
-pip install tensorflow             # Solo CPU
-```
-
-#### Dependencias Adicionales (opcionales)
-
-```bash
-# Manejo de datos
-pip install roboflow python-dotenv
-
-# Visualización avanzada
-pip install seaborn scikit-learn
-
-# Desarrollo
-pip install jupyter ipython
-
-# Verificación de código
-pip install black flake8
-```
-
----
-
-### Paso 5: Verificar Instalación
-
-```bash
-# Verificar Python
-python -c "import sys; print(f'Python: {sys.version}')"
-
-# Verificar YOLOv8
-python -c "from ultralytics import YOLO; print('✓ YOLO OK')"
-
-# Verificar OpenCV
-python -c "import cv2; print(f'✓ OpenCV {cv2.__version__}')"
-
-# Verificar PyTorch (si lo instalaste)
-python -c "import torch; print(f'✓ PyTorch {torch.__version__}')"
-python -c "import torch; print(f'✓ CUDA disponible: {torch.cuda.is_available()}')"
-
-# Verificar TensorFlow (si lo instalaste)
-python -c "import tensorflow as tf; print(f'✓ TensorFlow {tf.__version__}')"
-```
-
----
-
-### Paso 6: Crear Archivo de Configuración (Opcional)
-
-Si usas API keys (Roboflow, etc.):
-
-```bash
-# Crear archivo .env
-cat > .env << 'EOF'
-ROBOFLOW_API_KEY=tu_api_key_aqui
-CLUSTER_USER=tu_usuario
-CLUSTER_HOST=172.16.24.2
-EOF
-
-# NO COMMITEAR este archivo
-echo ".env" >> .gitignore
-```
-
----
-
-## ⚡ Quick Start - Primeros Pasos
-
-### Para principiantes (sin experiencia con cluster):
-
-```bash
-# 1. Clonar repositorio
-git clone https://github.com/tomas0821/Futsal-UCR-Vision-computacional
-cd Futsal-UCR-Vision-computacional
-
-# 2. Crear y activar entorno
-mamba create -n futsal python=3.11 -y
-mamba activate futsal
-# (o usa conda si no tienes mamba)
-
-# 3. Instalar dependencias (mamba es más rápido)
-mamba install -c conda-forge ultralytics opencv numpy torch torchvision
-# (o usa: pip install ultralytics opencv-python torch torchvision)
-
-# 4. Leer el tutorial
-cat README_TUTORIAL.md
-
-# 5. Conectar al cluster
-ssh usuario@172.16.24.2
-
-# 6. Enviar tu primer trabajo
-sbatch tutorial/ejemplo_serial.sh
-
-# 7. Monitorear
-squeue -u $USER
-```
-
-### Para usuarios avanzados:
-
-```bash
-# Ir directo a GPU
-sbatch tutorial/ejemplo_gpu.sh
-
-# Ver disponibilidad GPU
-sinfo -p gpu
-
-# Crear tu rama para experimentos
-git checkout -b mi-experimento
-```
-
----
-
-## 🤝 Contribuciones
-
-Las estudiantes asistentes deben seguir la estructura de carpetas `ejemplo-X-...` para agregar nuevos módulos al proyecto.
-
-**Para trabajar en el cluster:**
-1. Crear una rama: `git checkout -b mi-feature`
-2. Hacer cambios y commits
-3. Mergear a master: `git merge mi-feature`
-4. Subir: `git push origin master`
-
----
-
-## 🐛 Troubleshooting - Instalación
-
-### "conda: command not found"
-
-```bash
-# Conda no está en el PATH
-source ~/miniconda3/bin/activate
-# O reinicia la terminal después de instalar
-bash
-```
-
-### "No module named 'ultralytics'"
-
-```bash
-# Verificar que el entorno esté activado
-conda activate futsal
-# Reinstalar
-pip install --upgrade ultralytics
-```
-
-### Error de GPU / CUDA
-
-```bash
-# Verificar CUDA
-nvidia-smi
-
-# Si no funciona GPU, instalar CPU-only
-pip uninstall torch -y
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-```
-
-### Error con OpenCV
-
-```bash
-# En sistemas Ubuntu/Debian
-sudo apt-get install libgl1-mesa-glx libglib2.0-0
-pip install --upgrade opencv-python
-```
-
-### Conflicto de versiones
-
-```bash
-# Crear nuevo entorno limpio
-conda env remove -n futsal
-conda create -n futsal python=3.11 -y
-conda activate futsal
-pip install -r requirements.txt  # Si existe
-```
-
-### GitHub - "Authentication failed"
-
-```bash
-# Usar HTTPS con token (recomendado)
-git config --global credential.helper store
-# O generar SSH key
-ssh-keygen -t ed25519 -C "tu_email@ejemplo.com"
-```
-
----
-
-## 📞 Soporte
-
-- **Preguntas sobre setup:** Ver sección [🔧 Instalación](#-instalación-y-configuración)
-- **Preguntas sobre el tutorial:** Ver [README_TUTORIAL.md](./README_TUTORIAL.md#troubleshooting)
-- **Problemas con cluster:** Contactar administrador del cluster
-- **Issues técnicos:** Abrir un issue en [GitHub Issues](https://github.com/tomas0821/Futsal-UCR-Vision-computacional/issues)
-
----
-
-## 📚 Recursos Adicionales
-
-- [Conda Cheat Sheet](https://conda.io/projects/conda/en/latest/_downloads/misc/conda-cheatsheet.pdf)
-- [Git Workflow Guide](https://git-scm.com/book/en/v2)
-- [YOLOv8 Docs](https://docs.ultralytics.com/)
-- [PyTorch Getting Started](https://pytorch.org/get-started/locally/)
-- [UCR Cluster Documentation](./cluster/)
+Proyecto de investigación de la Universidad de Costa Rica, coordinado por Tomás Rojas, con la participación de estudiantes asistentes. Entrenamiento e inferencia en el clúster HPC de la UCR (GPU A100, SLURM). Para citar el repositorio, ver [CITATION.cff](CITATION.cff).

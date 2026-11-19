@@ -1,0 +1,19 @@
+name: futsal_env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - numpy>=1.24
+  - scipy>=1.10
+  - matplotlib>=3.7
+  - pillow>=10
+  - pyyaml
+  - ffmpeg
+  - pip:
+      - ultralytics>=8.3,<9
+      - torch>=2.0
+      - torchvision
+      - opencv-python>=4.8
+      - roboflow
+      - python-dotenv

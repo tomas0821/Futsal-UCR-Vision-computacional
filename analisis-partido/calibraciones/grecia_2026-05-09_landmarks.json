@@ -1,0 +1,218 @@
+{
+ "match": "grecia_2026-05-09",
+ "created": "2026-09-17T13:31:37.463Z",
+ "image": {
+  "name": "frame_007.jpg",
+  "width": 3840,
+  "height": 2160
+ },
+ "pitch": {
+  "length_m": 37.19,
+  "width_m": 17.2,
+  "frame": "X along far touchline from left goal line; Y from far touchline toward camera; Z up"
+ },
+ "goal": {
+  "width_m": 3,
+  "height_m": 2
+ },
+ "points": [
+  {
+   "id": "FL",
+   "name": "Far-left corner",
+   "X": 0,
+   "Y": 0,
+   "Z": 0,
+   "u": 994.4,
+   "v": 1131
+  },
+  {
+   "id": "FR",
+   "name": "Far-right corner",
+   "X": 37.19,
+   "Y": 0,
+   "Z": 0,
+   "u": 2717,
+   "v": 1050.2
+  },
+  {
+   "id": "NR",
+   "name": "Near-right corner",
+   "X": 37.19,
+   "Y": 17.2,
+   "Z": 0,
+   "u": 3751.1,
+   "v": 1299.9
+  },
+  {
+   "id": "NL",
+   "name": "Near-left corner",
+   "X": 0,
+   "Y": 17.2,
+   "Z": 0,
+   "u": null,
+   "v": null
+  },
+  {
+   "id": "CT",
+   "name": "Centre line, far end",
+   "X": 18.595,
+   "Y": 0,
+   "Z": 0,
+   "u": 1862,
+   "v": 1093.1
+  },
+  {
+   "id": "CB",
+   "name": "Centre line, near end",
+   "X": 18.595,
+   "Y": 17.2,
+   "Z": 0,
+   "u": 1884.7,
+   "v": 1764
+  },
+  {
+   "id": "CCF",
+   "name": "Centre circle, far crossing",
+   "X": 18.595,
+   "Y": 5.6,
+   "Z": 0,
+   "u": 1872.1,
+   "v": 1166.3
+  },
+  {
+   "id": "CCN",
+   "name": "Centre circle, near crossing",
+   "X": 18.595,
+   "Y": 11.6,
+   "Z": 0,
+   "u": 1874.6,
+   "v": 1335.3
+  },
+  {
+   "id": "LPF",
+   "name": "Left goal, far post base",
+   "X": 0,
+   "Y": 7.1,
+   "Z": 0,
+   "u": 737.1,
+   "v": 1219.2
+  },
+  {
+   "id": "LPN",
+   "name": "Left goal, near post base",
+   "X": 0,
+   "Y": 10.1,
+   "Z": 0,
+   "u": 553,
+   "v": 1279.8
+  },
+  {
+   "id": "LCF",
+   "name": "Left goal, far crossbar end",
+   "X": 0,
+   "Y": 7.1,
+   "Z": 2,
+   "u": 694.2,
+   "v": 1113.3
+  },
+  {
+   "id": "LCN",
+   "name": "Left goal, near crossbar end",
+   "X": 0,
+   "Y": 10.1,
+   "Z": 2,
+   "u": 505.1,
+   "v": 1153.7
+  },
+  {
+   "id": "RPF",
+   "name": "Right goal, far post base",
+   "X": 37.19,
+   "Y": 7.1,
+   "Z": 0,
+   "u": 2984.4,
+   "v": 1115.8
+  },
+  {
+   "id": "RPN",
+   "name": "Right goal, near post base",
+   "X": 37.19,
+   "Y": 10.1,
+   "Z": 0,
+   "u": 3158.4,
+   "v": 1158.7
+  },
+  {
+   "id": "RCF",
+   "name": "Right goal, far crossbar end",
+   "X": 37.19,
+   "Y": 7.1,
+   "Z": 2,
+   "u": 3002,
+   "v": 1007.4
+  },
+  {
+   "id": "RCN",
+   "name": "Right goal, near crossbar end",
+   "X": 37.19,
+   "Y": 10.1,
+   "Z": 2,
+   "u": 3181.1,
+   "v": 1035.1
+  },
+  {
+   "id": "LPA1",
+   "name": "Left penalty area, far corner (optional)",
+   "X": 6,
+   "Y": 7.1,
+   "Z": 0,
+   "u": 981.8,
+   "v": 1138.5
+  },
+  {
+   "id": "LPA2",
+   "name": "Left penalty area, near corner (optional)",
+   "X": 6,
+   "Y": 10.1,
+   "Z": 0,
+   "u": 68.7,
+   "v": 1428.6
+  },
+  {
+   "id": "RPA1",
+   "name": "Right penalty area, far corner (optional)",
+   "X": 31.189999999999998,
+   "Y": 7.1,
+   "Z": 0,
+   "u": 2739.7,
+   "v": 1055.3
+  },
+  {
+   "id": "RPA2",
+   "name": "Right penalty area, near corner (optional)",
+   "X": 31.189999999999998,
+   "Y": 10.1,
+   "Z": 0,
+   "u": 3637.6,
+   "v": 1274.7
+  },
+  {
+   "id": "LPM",
+   "name": "Left penalty mark (optional)",
+   "X": 6,
+   "Y": 8.6,
+   "Z": 0,
+   "u": 1211.3,
+   "v": 1254.5
+  },
+  {
+   "id": "RPM",
+   "name": "Right penalty mark (optional)",
+   "X": 31.189999999999998,
+   "Y": 8.6,
+   "Z": 0,
+   "u": 2522.8,
+   "v": 1194
+  }
+ ]
+}

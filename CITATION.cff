@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "Si usa este código o los modelos, cite el repositorio."
+title: "Futsal UCR: análisis de partidos con visión por computadora"
+type: software
+authors:
+  - family-names: Rojas
+    given-names: Tomás
+    affiliation: "Universidad de Costa Rica"
+repository-code: "https://github.com/tomas0821/Futsal-UCR-Vision-computacional"
+license: NOASSERTION
+date-released: 2026-11-19
+version: "2026.11"
+keywords:
+  - futsal
+  - YOLOv8
+  - computer vision
+  - sports analytics

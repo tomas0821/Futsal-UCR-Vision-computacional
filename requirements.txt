@@ -1,0 +1,14 @@
+# Inferencia y entrenamiento (clúster y local). Probado con Python 3.11 y Ultralytics 8.4.
+ultralytics>=8.3,<9
+torch>=2.0
+torchvision
+opencv-python>=4.8
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+pillow>=10
+pyyaml
+roboflow
+python-dotenv
+# Opcional: lectura de dorsales (analisis-partido/experimental)
+# easyocr
