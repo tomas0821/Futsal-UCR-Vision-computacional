@@ -106,4 +106,4 @@ La clave de la API se guarda en `ejemplo-1-deteccion-basica/.env`; los demás ej
 
 ## Autoría
 
-Proyecto de investigación de la Universidad de Costa Rica, coordinado por Tomás Rojas, con la participación de estudiantes asistentes. Entrenamiento e inferencia en el clúster HPC de la UCR (GPU A100, SLURM). Para citar el repositorio, ver [CITATION.cff](CITATION.cff).
+Proyecto de investigación de la Universidad de Costa Rica. Coordinador: Jorge Salazar. Equipo: Tomás Rojas y Eduardo Arias, con la participación de estudiantes asistentes. Entrenamiento e inferencia en el clúster HPC de la UCR (GPU A100, SLURM). Para citar el repositorio, ver [CITATION.cff](CITATION.cff).

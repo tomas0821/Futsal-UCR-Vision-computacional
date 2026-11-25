@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Futsal UCR · resultados</title>
+<meta name="description" content="Resultados provisionales del análisis por visión por computadora de un primer tiempo de futsal: mapa de tiros, mapas de calor y distancia recorrida.">
+<style>
+:root{color-scheme:light;
+  --bg:#f6f5f2;--surface:#ffffff;--pitch:#f1f0ec;--line:#c9c6bf;--grid:#e6e4df;
+  --text:#1b1b1b;--text2:#5f5d58;--muted:#8a877f;--accent:#1b1b1b;
+  --A:#b42318;--B:#2e6fb5;--A-soft:#f6d9d5;--B-soft:#d9e6f5;--warn:#9a6700;--warn-bg:#fff4d6;
+  --radius:12px;--shadow:0 1px 2px rgba(0,0,0,.06),0 6px 18px rgba(0,0,0,.05)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#141414;--surface:#1e1e1e;--pitch:#232323;--line:#4a4a4a;--grid:#2c2c2c;
+  --text:#ececec;--text2:#b0b0b0;--muted:#7f7f7f;--accent:#ececec;
+  --A:#e8513f;--B:#4a90d9;--A-soft:#4a2320;--B-soft:#1f3350;--warn:#e3b341;--warn-bg:#2d2616;
+  --shadow:none}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#141414;--surface:#1e1e1e;--pitch:#232323;--line:#4a4a4a;--grid:#2c2c2c;
+  --text:#ececec;--text2:#b0b0b0;--muted:#7f7f7f;--accent:#ececec;
+  --A:#e8513f;--B:#4a90d9;--A-soft:#4a2320;--B-soft:#1f3350;--warn:#e3b341;--warn-bg:#2d2616;--shadow:none}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow-x:hidden}
+a{color:inherit;text-underline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+header{padding:40px 0 20px}
+.kicker{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin:0 0 8px}
+h1{font-size:clamp(28px,4.5vw,42px);line-height:1.1;margin:0 0 12px;letter-spacing:-.01em}
+.lead{font-size:18px;color:var(--text2);max-width:62ch;margin:0}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--warn-bg);color:var(--warn);vertical-align:middle;margin-left:8px}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--text2);margin:18px 0 0}
+section{padding:28px 0}
+h2{font-size:22px;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--text2);margin:0 0 18px;max-width:70ch}
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:720px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px}
+.tile .lab{font-size:13px;color:var(--text2);margin-bottom:4px}
+.tile .vals{display:flex;align-items:baseline;gap:14px}
+.tile .v{font-size:26px;font-weight:600;letter-spacing:-.02em;display:flex;align-items:baseline;gap:7px}
+.tile .v small{font-size:13px;font-weight:400;color:var(--muted)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none;transform:translateY(-1px)}
+.dotA{background:var(--A)}.dotB{background:var(--B)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--text2);margin:10px 0 0;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+svg.pitch{width:100%;height:auto;display:block;overflow:visible}
+.pl{fill:none;stroke:var(--line);stroke-width:.09}
+.dir{font-size:.9px;fill:var(--text2);font-weight:600}
+.cell{shape-rendering:crispEdges}
+.shot{cursor:pointer}
+.shot:hover .mk,.bar:hover rect.fill{filter:brightness(1.15)}
+.hit{fill:transparent}
+.caption{font-size:14px;color:var(--text2);margin:10px 0 0}
+.tip{position:fixed;pointer-events:none;z-index:9;background:var(--text);color:var(--bg);font-size:13px;line-height:1.35;padding:7px 10px;border-radius:8px;max-width:260px;opacity:0;transition:opacity .08s;white-space:pre-line}
+.bt{margin:0 0 10px;font-weight:600;font-size:14px}
+.row{display:grid;grid-template-columns:38px 1fr;grid-template-areas:"id track" "id val";column-gap:8px;align-items:center;padding:4px 0;border-radius:6px}
+.row:hover{background:var(--grid)}
+.row .id{grid-area:id;font-size:13px;font-variant-numeric:tabular-nums}
+.row .track{grid-area:track;display:block;height:10px;position:relative}
+.row .fill{display:block;height:10px;border-radius:0 4px 4px 0}
+.row .val{grid-area:val;font-size:12px;color:var(--text2);line-height:1.3;margin-top:2px}
+@media (min-width:1000px){.row{grid-template-columns:38px 1fr 150px;grid-template-areas:"id track val"}.row .val{margin:0;white-space:nowrap;font-size:11.5px}}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--grid);vertical-align:top}
+th{color:var(--text2);font-weight:600;font-size:13px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+details summary{cursor:pointer;color:var(--text2);font-size:14px;margin-top:12px}
+.tbl{overflow-x:auto;margin-top:10px}
+ul.notes{padding-left:20px;margin:8px 0}
+ul.notes li{margin:4px 0}
+.hero{width:100%;border-radius:var(--radius);display:block;box-shadow:var(--shadow)}
+footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px solid var(--grid);margin-top:20px}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.links a{font-size:14px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--text)}
+.links a:hover{background:var(--surface)}
+.err{color:var(--warn);background:var(--warn-bg);padding:10px 14px;border-radius:8px;margin:12px 0}
+</style>
+</head>
+<body>
+<div class="tip" id="tip"></div>
+<div class="wrap">
+<header>
+  <p class="kicker">Universidad de Costa Rica · visión por computadora</p>
+  <h1>Un primer tiempo de futsal, leído por una sola cámara <span class="badge">provisional</span></h1>
+  <p class="lead" id="lead">San Ramón vs Grecia, 9 de mayo de 2026, primer tiempo (27 minutos). Detección, seguimiento y proyección a la cancha sin intervención manual.</p>
+  <nav class="toc"><a href="#resumen">Resumen</a><a href="#tiros">Mapa de tiros</a><a href="#calor">Mapas de calor</a><a href="#distancias">Distancias</a><a href="#metodo">Método y límites</a><a href="#datos">Datos</a></nav>
+</header>
+
+<section id="resumen">
+  <div class="tiles" id="tiles"></div>
+  <p class="caption">La posesión es un indicador aproximado: cuadros en que el jugador más cercano al balón (≤ 2.5 m) es de cada equipo. Resultado real del tiempo: 3 – 1; el gol de Grecia no se detectó (ver <a href="#metodo">límites</a>).</p>
+</section>
+
+<section id="tiros">
+  <h2>Mapa de tiros</h2>
+  <p class="sub">Posición del balón en el momento del tiro. San Ramón ataca la portería de la izquierda; Grecia, la de la derecha. Pasa el cursor por cada marca.</p>
+  <div class="card">
+    <div id="shotmap"></div>
+    <div class="legend" id="shotlegend"></div>
+    <details><summary>Ver la tabla de eventos</summary><div class="tbl" id="evtable"></div></details>
+  </div>
+</section>
+
+<section id="calor">
+  <h2>Mapas de calor</h2>
+  <p class="sub">Ocupación de los jugadores de campo durante el tiempo completo, en celdas de 0.5 m, relativa al máximo de cada equipo. Los porteros no se incluyen.</p>
+  <div class="grid2">
+    <div class="card"><div id="heatA"></div><p class="caption" id="capA"></p></div>
+    <div class="card"><div id="heatB"></div><p class="caption" id="capB"></p></div>
+  </div>
+</section>
+
+<section id="distancias">
+  <h2>Distancia recorrida</h2>
+  <p class="sub">Por identidad de seguimiento (A1, B4, …), no por dorsal: una identidad dura entre 1 y 11 minutos y puede corresponder a más de una persona tras una sustitución. Trayectoria suavizada a 0.5 s antes de integrar; velocidad máxima con ventana de 1 s.</p>
+  <div class="grid2 bars">
+    <div class="card"><div id="barsA"></div></div>
+    <div class="card"><div id="barsB"></div></div>
+  </div>
+  <p class="caption" id="gkcap"></p>
+  <details><summary>Ver la tabla completa</summary><div class="tbl" id="pltable"></div></details>
+</section>
+
+<section id="metodo">
+  <h2>Método y límites</h2>
+  <div class="grid2">
+    <div class="card">
+      <p style="margin:0 0 8px"><strong>Cómo se obtuvo.</strong> Un modelo YOLOv8m de cuatro clases (balón, jugador, portero, árbitro) entrenado con 2 274 imágenes de cuatro partidos. Las personas se detectan a 1080p y se siguen con BotSort; el balón, de unos 15 px, exige un pase aparte sobre el video 4K a 2560 px. Una calibración de la lente convierte píxeles en metros con medio metro de error. Los equipos se asignan por el color de la camiseta y las pistas se enlazan en identidades.</p>
+      <p style="margin:0"><strong>Definiciones.</strong> Tiro: balón a ≥ 8 m/s dirigido a la portería desde ≤ 20 m. A puerta: dentro de la boca de la portería. Gol: tiro seguido de la formación de saque de centro. Distancia: integral de la trayectoria suavizada.</p>
+    </div>
+    <div class="card">
+      <p style="margin:0 0 6px"><strong>Lo que todavía falla.</strong></p>
+      <ul class="notes">
+        <li>El gol de Grecia (10:42) no se detectó: el juego se reinició en diez segundos, sin la formación que busca el detector.</li>
+        <li>Tres tiros a puerta de Grecia aparecen como «posible gol, revisar»: el balón cruzó la línea en el modelo, pero no hubo saque de centro.</li>
+        <li>Las identidades no son dorsales; la lectura de números de camiseta está en desarrollo.</li>
+        <li>El balón se ve en el 62 % de los cuadros; con interpolación de huecos cortos, en el 78 %.</li>
+        <li>Un solo tiempo analizado. El segundo tiempo y otros partidos están pendientes.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="datos">
+  <h2>Datos y código</h2>
+  <p class="sub">Todo lo que se muestra se genera a partir de tres CSV y un JSON de resumen del primer tiempo, disponibles en el repositorio junto con el código.</p>
+  <div class="links">
+    <a href="https://github.com/tomas0821/Futsal-UCR-Vision-computacional">Repositorio</a>
+    <a href="pipeline.md">Pipeline (docs/pipeline.md)</a>
+    <a href="resultados.md">Resultados detallados</a>
+    <a href="datos_1T/grecia_1T_v7_events.csv">events.csv</a>
+    <a href="datos_1T/grecia_1T_v7_players.csv">players.csv</a>
+    <a href="datos_1T/grecia_1T_v7_teams.csv">teams.csv</a>
+    <a href="datos_1T/grecia_1T_v7_sitio.json">sitio.json</a>
+    <a href="https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases">Pesos de los modelos</a>
+  </div>
+  <p class="caption" style="margin-top:16px"><img class="hero" src="figuras/deteccion_personas.jpg" alt="Detección de personas en dos cuadros del primer tiempo"></p>
+  <p class="caption">Minutos 07:18 y 15:27: 4 + 4 jugadores de campo, dos porteros y el árbitro, cada uno con identidad y equipo.</p>
+</section>
+
+<footer>
+  Proyecto de investigación de la Universidad de Costa Rica. Coordinador: Jorge Salazar. Equipo: Tomás Rojas y Eduardo Arias. Entrenamiento e inferencia en el clúster HPC de la UCR. Resultados provisionales, sujetos a revisión.
+</footer>
+</div>
+
+<script>
+(async function(){
+const tip=document.getElementById('tip');
+function showTip(e,txt){tip.textContent=txt;tip.style.opacity=1;moveTip(e)}
+function moveTip(e){const x=e.clientX,y=e.clientY,w=tip.offsetWidth,h=tip.offsetHeight;
+  tip.style.left=Math.min(x+14,innerWidth-w-8)+'px';tip.style.top=(y-h-12<8?y+16:y-h-12)+'px'}
+function hideTip(){tip.style.opacity=0}
+function bind(el,txt){el.addEventListener('pointerenter',e=>showTip(e,txt));el.addEventListener('pointermove',moveTip);el.addEventListener('pointerleave',hideTip)}
+const fmt=n=>n.toLocaleString('es-CR');
+const S='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(S,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+
+let D;
+try{D=await (await fetch('datos_1T/grecia_1T_v7_sitio.json')).json()}
+catch(err){document.getElementById('tiles').insertAdjacentHTML('beforebegin','<p class="err">No se pudo cargar datos_1T/grecia_1T_v7_sitio.json. Si abriste el archivo localmente, sírvelo con un servidor web (por ejemplo <code>python3 -m http.server</code>).</p>');return}
+const L=D.pitch.L,W=D.pitch.W,T=D.teams,N=D.names;
+const col=t=>t==='A'?'var(--A)':'var(--B)';
+
+// --- tiles
+const tiles=document.getElementById('tiles');
+const row=(lab,fa,fb)=>`<div class="tile"><div class="lab">${lab}</div><div class="vals"><div class="v"><span class="dot dotA"></span>${fa}</div><div class="v"><span class="dot dotB"></span>${fb}</div></div></div>`;
+tiles.innerHTML=row('Goles detectados',T.A.goals,T.B.goals)+row('Posesión',T.A.possession+'<small>%</small>',T.B.possession+'<small>%</small>')
+ +row('Tiros · a puerta',`${T.A.shots}<small>· ${T.A.on_target}</small>`,`${T.B.shots}<small>· ${T.B.on_target}</small>`)
+ +row('Distancia del equipo',`${T.A.km.toFixed(1)}<small>km</small>`,`${T.B.km.toFixed(1)}<small>km</small>`);
+tiles.insertAdjacentHTML('afterend',`<div class="legend"><span><i class="dot dotA"></i>${N.A}</span><span><i class="dot dotB"></i>${N.B}</span></div>`);
+
+// --- pitch drawing (viewBox in metres, origin top-left, y down = toward the camera)
+function pitch(parent,opts={}){
+  const m=1.6, svg=el('svg',{class:'pitch',viewBox:`${-m} ${-m} ${L+2*m} ${W+2*m}`,role:'img'},parent);
+  if(opts.bg)el('rect',{x:0,y:0,width:L,height:W,fill:'var(--pitch)'},svg);
+  const g=el('g',{},svg);
+  el('rect',{x:0,y:0,width:L,height:W,class:'pl'},g);
+  el('line',{x1:L/2,y1:0,x2:L/2,y2:W,class:'pl'},g);
+  el('circle',{cx:L/2,cy:W/2,r:3,class:'pl'},g);
+  // futsal penalty areas: 6 m arcs from each post joined by a 3 m straight
+  const gw=3, y1=W/2-gw/2, y2=W/2+gw/2;
+  el('path',{d:`M0 ${y1-6} A6 6 0 0 1 6 ${y1} L6 ${y2} A6 6 0 0 1 0 ${y2+6}`,class:'pl'},g);
+  el('path',{d:`M${L} ${y1-6} A6 6 0 0 0 ${L-6} ${y1} L${L-6} ${y2} A6 6 0 0 0 ${L} ${y2+6}`,class:'pl'},g);
+  el('rect',{x:-1,y:y1,width:1,height:gw,class:'pl'},g);el('rect',{x:L,y:y1,width:1,height:gw,class:'pl'},g);
+  el('circle',{cx:6,cy:W/2,r:.12,fill:'var(--line)'},g);el('circle',{cx:L-6,cy:W/2,r:.12,fill:'var(--line)'},g);
+  return svg;
+}
+function arrows(svg,a,b){ // attacking-direction labels under the pitch
+  const y=W+1.1;
+  if(a)el('text',{x:0.2,y,class:'dir'},svg).textContent=a;
+  if(b){const t=el('text',{x:L-0.2,y,class:'dir','text-anchor':'end'},svg);t.textContent=b}
+}
+
+// --- shot map
+{
+  const svg=pitch(document.getElementById('shotmap'),{bg:true});
+  arrows(svg,`◀ ${N.A} ataca`,`${N.B} ataca ▶`);
+  const ev=D.events.filter(e=>e.x!==''&&(e.type.startsWith('shot')||e.type.startsWith('goal')));
+  const kind=e=>e.type.startsWith('goal')?'gol':e.type.includes('possible')?'posible':e.type.includes('on target')?'puerta':'tiro';
+  for(const e of ev){
+    const t=e.team.startsWith('San')?'A':'B',k=kind(e),x=+e.x,y=+e.y,c=col(t);
+    const g=el('g',{class:'shot'},svg);
+    el('circle',{cx:x,cy:y,r:1.1,class:'hit'},g);
+    const mk=el('circle',{cx:x,cy:y,r:.5,class:'mk',stroke:c,'stroke-width':.14,fill:k==='tiro'?'var(--surface)':c,'fill-opacity':k==='posible'?.4:1},g);
+    if(k==='gol'){el('circle',{cx:x,cy:y,r:.17,fill:'var(--surface)'},g)}
+    if(k!=='tiro')el('text',{x:x,y:y-.85,'text-anchor':'middle','font-size':'.75','fill':'var(--text2)'},g).textContent=e.player;
+    const d=e.detail.replace('speed','velocidad').replace('from','desde').replace('aimed','dirigido a').replace('from the goal centre','del centro de la portería').replace('crossed the line at','cruzó la línea a');
+    bind(g,`${e.time} · ${e.team} ${e.player}\n${{gol:'Gol',posible:'A puerta, posible gol (revisar)',puerta:'Tiro a puerta',tiro:'Tiro'}[k]}\n${d}`);
+  }
+  const lg=document.getElementById('shotlegend');
+  const sw=(fill,stroke,half,inner)=>`<svg width="16" height="16" viewBox="-1 -1 2 2"><circle r=".8" fill="${fill}" stroke="${stroke}" stroke-width=".25" ${half?'fill-opacity=".4"':''}/>${inner?'<circle r=".25" fill="var(--surface)"/>':''}</svg>`;
+  lg.innerHTML=`<span><i class="dot dotA"></i>${N.A}</span><span><i class="dot dotB"></i>${N.B}</span><span>${sw('var(--surface)','currentColor')} tiro</span><span>${sw('currentColor','currentColor')} a puerta</span><span>${sw('currentColor','currentColor',true)} posible gol</span><span>${sw('currentColor','currentColor',false,true)} gol</span>`;
+  const rows=D.events.map(e=>`<tr><td>${e.time}</td><td><span class="dot ${e.team.startsWith('San')?'dotA':'dotB'}"></span> ${e.team}</td><td>${e.player||'—'}</td><td>${e.type}</td><td>${e.detail}</td></tr>`).join('');
+  document.getElementById('evtable').innerHTML=`<table><thead><tr><th>Min</th><th>Equipo</th><th>Id.</th><th>Evento</th><th>Detalle</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// --- heat maps
+for(const t of ['A','B']){
+  const svg=pitch(document.getElementById('heat'+t),{bg:true});
+  const H=D.heat[t], c=col(t), g=el('g',{},svg);
+  svg.insertBefore(g,svg.children[1]); // cells under the lines
+  for(let i=0;i<H.length;i++)for(let j=0;j<H[i].length;j++){
+    const v=H[i][j]; if(v<3)continue;
+    const r=el('rect',{x:j/2,y:i/2,width:.5,height:.5,class:'cell',fill:c,'fill-opacity':(0.08+0.92*v/100).toFixed(3)},g);
+    bind(r,`${N[t]} · x ${(j/2).toFixed(1)} m, y ${(i/2).toFixed(1)} m\n${v} % del máximo del equipo`);
+  }
+  arrows(svg,t==='A'?`◀ ${N.A} ataca`:'',t==='B'?`${N.B} ataca ▶`:'');
+  document.getElementById('cap'+t).innerHTML=`<span class="dot dot${t}"></span> <strong>${N[t]}</strong> · ${T[t].possession} % de posesión · ${T[t].km.toFixed(1)} km recorridos`;
+}
+
+// --- distance bars
+function bars(t,parent){
+  const P=D.players.filter(p=>p.team===t).sort((a,b)=>b.m-a.m).slice(0,8);
+  const max=Math.max(...D.players.filter(p=>p.team!=='GK').map(p=>p.m));
+  parent.innerHTML=`<p class="bt"><span class="dot dot${t}"></span> ${N[t]} · ocho identidades con más recorrido</p>`;
+  for(const p of P){
+    const r=document.createElement('div');r.className='row';
+    r.innerHTML=`<span class="id">${p.id}</span><span class="track"><span class="fill" style="width:${(100*p.m/max).toFixed(1)}%;background:${col(t)}"></span></span><span class="val">${fmt(p.m)} m · ${p.min} min · ${p.mpm} m/min</span>`;
+    bind(r,`${N[t]} ${p.id}\n${fmt(p.m)} m en ${p.min} min (${p.mpm} m/min)\nvelocidad máx. ${p.vmax} m/s (${Math.round(p.vmax*3.6)} km/h)\nsin suavizar: ${fmt(p.raw_m)} m\ntiros ${p.shots}, goles ${p.goals}`);
+    parent.appendChild(r);
+  }
+}
+bars('A',document.getElementById('barsA'));bars('B',document.getElementById('barsB'));
+{
+  const gk=D.players.filter(p=>p.team==='GK');
+  const outf=D.players.filter(p=>p.team!=='GK'&&p.min>=3);
+  const med=a=>{const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)]};
+  document.getElementById('gkcap').textContent=`Ritmo típico de un jugador de campo con al menos 3 min seguidos: ${med(outf.map(p=>p.mpm))} m/min (el futsal de élite medido con sistemas de posicionamiento ronda 117 a 121 m/min). Porteros: ${gk.map(p=>`${p.id==='GK_left1'?'izquierda':'derecha'} ${fmt(p.m)} m en ${p.min} min`).join(', ')}. Sin suavizar, los totales por equipo serían ${T.A.raw_km} y ${T.B.raw_km} km: alrededor de un tercio de temblor del rastreo.`;
+  const rows=D.players.map(p=>`<tr><td><span class="dot ${p.team==='A'?'dotA':p.team==='B'?'dotB':''}"></span> ${p.team==='GK'?'Portero':N[p.team]}</td><td>${p.id}</td><td class="n">${p.min}</td><td class="n">${fmt(p.m)}</td><td class="n">${p.mpm}</td><td class="n">${p.vmax}</td><td class="n">${fmt(p.raw_m)}</td><td class="n">${p.shots}</td><td class="n">${p.goals}</td></tr>`).join('');
+  document.getElementById('pltable').innerHTML=`<table><thead><tr><th>Equipo</th><th>Id.</th><th class="n">min</th><th class="n">m</th><th class="n">m/min</th><th class="n">v máx (m/s)</th><th class="n">m sin suavizar</th><th class="n">tiros</th><th class="n">goles</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+})();
+</script>
+</body>
+</html>
