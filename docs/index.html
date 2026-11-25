@@ -4,26 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Futsal UCR · resultados</title>
-<meta name="description" content="Resultados provisionales del análisis por visión por computadora de un primer tiempo de futsal: mapa de tiros, mapas de calor y distancia recorrida.">
+<meta name="description" content="Resultados provisionales del análisis por visión por computadora de un primer tiempo de futsal: mapa de tiros, mapas de calor, distancia recorrida y los métodos detrás.">
 <style>
 :root{color-scheme:light;
   --bg:#f6f5f2;--surface:#ffffff;--pitch:#f1f0ec;--line:#c9c6bf;--grid:#e6e4df;
-  --text:#1b1b1b;--text2:#5f5d58;--muted:#8a877f;--accent:#1b1b1b;
-  --A:#b42318;--B:#2e6fb5;--A-soft:#f6d9d5;--B-soft:#d9e6f5;--warn:#9a6700;--warn-bg:#fff4d6;
+  --text:#1b1b1b;--text2:#5f5d58;--muted:#8a877f;
+  --A:#b42318;--B:#2e6fb5;--warn:#9a6700;--warn-bg:#fff4d6;
   --radius:12px;--shadow:0 1px 2px rgba(0,0,0,.06),0 6px 18px rgba(0,0,0,.05)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
   --bg:#141414;--surface:#1e1e1e;--pitch:#232323;--line:#4a4a4a;--grid:#2c2c2c;
-  --text:#ececec;--text2:#b0b0b0;--muted:#7f7f7f;--accent:#ececec;
-  --A:#e8513f;--B:#4a90d9;--A-soft:#4a2320;--B-soft:#1f3350;--warn:#e3b341;--warn-bg:#2d2616;
-  --shadow:none}}
+  --text:#ececec;--text2:#b0b0b0;--muted:#7f7f7f;
+  --A:#e8513f;--B:#4a90d9;--warn:#e3b341;--warn-bg:#2d2616;--shadow:none}}
 :root[data-theme="dark"]{color-scheme:dark;
   --bg:#141414;--surface:#1e1e1e;--pitch:#232323;--line:#4a4a4a;--grid:#2c2c2c;
-  --text:#ececec;--text2:#b0b0b0;--muted:#7f7f7f;--accent:#ececec;
-  --A:#e8513f;--B:#4a90d9;--A-soft:#4a2320;--B-soft:#1f3350;--warn:#e3b341;--warn-bg:#2d2616;--shadow:none}
+  --text:#ececec;--text2:#b0b0b0;--muted:#7f7f7f;
+  --A:#e8513f;--B:#4a90d9;--warn:#e3b341;--warn-bg:#2d2616;--shadow:none}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow-x:hidden}
 a{color:inherit;text-underline-offset:2px}
+code{font-size:.9em;background:var(--grid);padding:1px 5px;border-radius:4px}
 .wrap{max-width:1080px;margin:0 auto;padding:0 16px}
 header{padding:40px 0 20px}
 .kicker{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin:0 0 8px}
@@ -32,11 +32,14 @@ h1{font-size:clamp(28px,4.5vw,42px);line-height:1.1;margin:0 0 12px;letter-spaci
 .badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--warn-bg);color:var(--warn);vertical-align:middle;margin-left:8px}
 nav.toc{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--text2);margin:18px 0 0}
 section{padding:28px 0}
-h2{font-size:22px;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:24px;margin:0 0 6px;letter-spacing:-.01em}
+h3{font-size:18px;margin:0 0 6px}
 .sub{color:var(--text2);margin:0 0 18px;max-width:70ch}
 .card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.card p{margin:0 0 10px}.card p:last-child{margin-bottom:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.grid32{display:grid;grid-template-columns:3fr 2fr;gap:16px;align-items:start}
+@media (max-width:760px){.grid2,.grid32{grid-template-columns:1fr}}
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 @media (max-width:720px){.tiles{grid-template-columns:repeat(2,1fr)}}
 .tile{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px}
@@ -53,10 +56,10 @@ svg.pitch{width:100%;height:auto;display:block;overflow:visible}
 .dir{font-size:.9px;fill:var(--text2);font-weight:600}
 .cell{shape-rendering:crispEdges}
 .shot{cursor:pointer}
-.shot:hover .mk,.bar:hover rect.fill{filter:brightness(1.15)}
-.hit{fill:transparent}
+.shot:hover line,.shot:hover circle.mk{filter:brightness(1.2)}
+.hit{fill:none;stroke:transparent;stroke-width:1.2}
 .caption{font-size:14px;color:var(--text2);margin:10px 0 0}
-.tip{position:fixed;pointer-events:none;z-index:9;background:var(--text);color:var(--bg);font-size:13px;line-height:1.35;padding:7px 10px;border-radius:8px;max-width:260px;opacity:0;transition:opacity .08s;white-space:pre-line}
+.tip{position:fixed;pointer-events:none;z-index:9;background:var(--text);color:var(--bg);font-size:13px;line-height:1.35;padding:7px 10px;border-radius:8px;max-width:270px;opacity:0;transition:opacity .08s;white-space:pre-line}
 .bt{margin:0 0 10px;font-weight:600;font-size:14px}
 .row{display:grid;grid-template-columns:38px 1fr;grid-template-areas:"id track" "id val";column-gap:8px;align-items:center;padding:4px 0;border-radius:6px}
 .row:hover{background:var(--grid)}
@@ -65,15 +68,31 @@ svg.pitch{width:100%;height:auto;display:block;overflow:visible}
 .row .fill{display:block;height:10px;border-radius:0 4px 4px 0}
 .row .val{grid-area:val;font-size:12px;color:var(--text2);line-height:1.3;margin-top:2px}
 @media (min-width:1000px){.row{grid-template-columns:38px 1fr 150px;grid-template-areas:"id track val"}.row .val{margin:0;white-space:nowrap;font-size:11.5px}}
+svg.tl{width:100%;height:auto;display:block;overflow:visible}
+.tl text{font-size:11px;fill:var(--text2)}
+.tl .ax{stroke:var(--line);stroke-width:1}
+.tl .ev{cursor:pointer}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--grid);vertical-align:top}
 th{color:var(--text2);font-weight:600;font-size:13px}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 details summary{cursor:pointer;color:var(--text2);font-size:14px;margin-top:12px}
 .tbl{overflow-x:auto;margin-top:10px}
-ul.notes{padding-left:20px;margin:8px 0}
-ul.notes li{margin:4px 0}
-.hero{width:100%;border-radius:var(--radius);display:block;box-shadow:var(--shadow)}
+ul.notes,ol.notes{padding-left:20px;margin:8px 0}
+.notes li{margin:5px 0}
+img.fig{width:100%;height:auto;border-radius:8px;display:block;background:var(--grid)}
+.step{display:grid;grid-template-columns:44px 1fr;gap:12px;margin:0 0 22px}
+.step .num{width:36px;height:36px;border-radius:50%;background:var(--text);color:var(--bg);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px;margin-top:2px}
+.step h3{margin:6px 0 6px}
+.step p{margin:0 0 8px;max-width:72ch}
+.step .figs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:760px){.step .figs{grid-template-columns:1fr}}
+.step figure{margin:0}.step figcaption{font-size:13px;color:var(--text2);margin-top:6px}
+.gallery{display:grid;grid-template-columns:1fr 1fr;gap:18px 16px}
+@media (max-width:760px){.gallery{grid-template-columns:1fr}}
+.gallery figure{margin:0}.gallery figcaption{font-size:14px;color:var(--text2);margin-top:8px;line-height:1.45}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;margin:8px 0 0}
+.kv dt{color:var(--text2)}.kv dd{margin:0}
 footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px solid var(--grid);margin-top:20px}
 .links{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
 .links a{font-size:14px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--text)}
@@ -87,18 +106,18 @@ footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px soli
 <header>
   <p class="kicker">Universidad de Costa Rica · visión por computadora</p>
   <h1>Un primer tiempo de futsal, leído por una sola cámara <span class="badge">provisional</span></h1>
-  <p class="lead" id="lead">San Ramón vs Grecia, 9 de mayo de 2026, primer tiempo (27 minutos). Detección, seguimiento y proyección a la cancha sin intervención manual.</p>
-  <nav class="toc"><a href="#resumen">Resumen</a><a href="#tiros">Mapa de tiros</a><a href="#calor">Mapas de calor</a><a href="#distancias">Distancias</a><a href="#metodo">Método y límites</a><a href="#datos">Datos</a></nav>
+  <p class="lead">San Ramón vs Grecia, 9 de mayo de 2026, primer tiempo (27 minutos). Una cámara fija 4K, un detector entrenado con partidos propios y un procesamiento sin intervención manual.</p>
+  <nav class="toc"><a href="#resumen">Resumen</a><a href="#tiros">Mapa de tiros</a><a href="#linea">Línea de tiempo</a><a href="#momentos">Momentos</a><a href="#calor">Mapas de calor</a><a href="#distancias">Distancias</a><a href="#metodo">Cómo se construyó</a><a href="#limites">Límites</a><a href="#video">Video</a><a href="#datos">Datos</a></nav>
 </header>
 
 <section id="resumen">
   <div class="tiles" id="tiles"></div>
-  <p class="caption">La posesión es un indicador aproximado: cuadros en que el jugador más cercano al balón (≤ 2.5 m) es de cada equipo. Resultado real del tiempo: 3 – 1; el gol de Grecia no se detectó (ver <a href="#metodo">límites</a>).</p>
+  <p class="caption">La posesión es un indicador aproximado: cuadros en que el jugador más cercano al balón (≤ 2.5 m) es de cada equipo. Resultado real del tiempo: 3 – 1; el gol de Grecia no se detectó (ver <a href="#limites">límites</a>).</p>
 </section>
 
 <section id="tiros">
   <h2>Mapa de tiros</h2>
-  <p class="sub">Posición del balón en el momento del tiro. San Ramón ataca la portería de la izquierda; Grecia, la de la derecha. Pasa el cursor por cada marca.</p>
+  <p class="sub">Cada flecha sale del punto donde se golpeó el balón y apunta a donde su trayectoria alcanzó la línea de meta (o la habría alcanzado). San Ramón ataca la portería de la izquierda; Grecia, la de la derecha. Pasa el cursor por cada flecha.</p>
   <div class="card">
     <div id="shotmap"></div>
     <div class="legend" id="shotlegend"></div>
@@ -106,9 +125,28 @@ footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px soli
   </div>
 </section>
 
+<section id="linea">
+  <h2>Línea de tiempo</h2>
+  <p class="sub">Tiros, goles y saques de centro a lo largo de los 27 minutos. Cada gol detectado va seguido del saque de centro del equipo que lo recibió: esa formación es, de hecho, lo que el sistema usa para confirmar el gol.</p>
+  <div class="card"><div id="timeline"></div><div class="legend" id="tllegend"></div></div>
+</section>
+
+<section id="momentos">
+  <h2>Momentos clave, tal como los vio el sistema</h2>
+  <p class="sub">Cuadros del video de 1080p con las cajas del detector, la identidad asignada y el balón (anillo verde: detectado; naranja: interpolado). Los recortes amplían la mitad donde ocurre la jugada.</p>
+  <div class="gallery">
+    <figure><img class="fig" src="figuras/cuadros/0516_gol_a4.jpg" alt="Gol de San Ramón en el minuto 05:16"><figcaption><strong>05:16 · Primer gol de San Ramón.</strong> Tiro de A4 desde 11 m; el balón cruzó la línea a 1 m del centro y Grecia sacó de centro en 06:20.</figcaption></figure>
+    <figure><img class="fig" src="figuras/cuadros/0620_saque.jpg" alt="Saque de centro de Grecia en el minuto 06:20"><figcaption><strong>06:20 · El saque que confirma el gol.</strong> Balón quieto en el centro y cada equipo en su mitad: esta formación es la señal con la que el sistema cuenta los goles.</figcaption></figure>
+    <figure><img class="fig" src="figuras/cuadros/1445_gol_a8.jpg" alt="Gol de San Ramón en el minuto 14:45"><figcaption><strong>14:45 · Tercer gol de San Ramón.</strong> A8 remata desde 3 m a 21.7 m/s. El clip anotado de un minuto alrededor de este gol está en la página de versiones del repositorio.</figcaption></figure>
+    <figure><img class="fig" src="figuras/cuadros/1042_gol_grecia.jpg" alt="Gol de Grecia en el minuto 10:42, no detectado"><figcaption><strong>10:42 · El gol que se perdió.</strong> Grecia marca, pero San Ramón reanuda en diez segundos sin que los equipos vuelvan a sus mitades; sin formación de saque, el sistema no cuenta el gol. Es la limitación principal del detector de goles.</figcaption></figure>
+    <figure><img class="fig" src="figuras/cuadros/2227_parada.jpg" alt="Tiro de Grecia en el minuto 22:27, parada sobre la línea"><figcaption><strong>22:27 · Un «posible gol» que no lo fue.</strong> El modelo sitúa el balón más allá de la línea tras el tiro de B22, pero no hubo saque de centro: el portero la sacó sobre la línea. Con medio metro de error de calibración, la línea de gol no se puede decidir solo con la posición del balón.</figcaption></figure>
+    <figure><img class="fig" src="figuras/balon_casos_dificiles.jpg" alt="Casos difíciles del balón"><figcaption><strong>Donde el balón se pierde.</strong> Un despeje largo (9.6 s sin verlo), un balón perdido 3.5 s, medio segundo tapado entre las piernas, y una detección al fondo con confianza 0.23 y unos 7 px.</figcaption></figure>
+  </div>
+</section>
+
 <section id="calor">
   <h2>Mapas de calor</h2>
-  <p class="sub">Ocupación de los jugadores de campo durante el tiempo completo, en celdas de 0.5 m, relativa al máximo de cada equipo. Los porteros no se incluyen.</p>
+  <p class="sub">Ocupación de los jugadores de campo durante el tiempo completo, en celdas de 0.5 m, relativa al máximo de cada equipo. Los porteros no se incluyen. Grecia, con el 74 % de la posesión, ocupa sobre todo el campo de San Ramón; San Ramón se concentra delante de su área y ataca a la contra.</p>
   <div class="grid2">
     <div class="card"><div id="heatA"></div><p class="caption" id="capA"></p></div>
     <div class="card"><div id="heatB"></div><p class="caption" id="capB"></p></div>
@@ -118,7 +156,7 @@ footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px soli
 <section id="distancias">
   <h2>Distancia recorrida</h2>
   <p class="sub">Por identidad de seguimiento (A1, B4, …), no por dorsal: una identidad dura entre 1 y 11 minutos y puede corresponder a más de una persona tras una sustitución. Trayectoria suavizada a 0.5 s antes de integrar; velocidad máxima con ventana de 1 s.</p>
-  <div class="grid2 bars">
+  <div class="grid2">
     <div class="card"><div id="barsA"></div></div>
     <div class="card"><div id="barsB"></div></div>
   </div>
@@ -127,23 +165,120 @@ footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px soli
 </section>
 
 <section id="metodo">
-  <h2>Método y límites</h2>
-  <div class="grid2">
-    <div class="card">
-      <p style="margin:0 0 8px"><strong>Cómo se obtuvo.</strong> Un modelo YOLOv8m de cuatro clases (balón, jugador, portero, árbitro) entrenado con 2 274 imágenes de cuatro partidos. Las personas se detectan a 1080p y se siguen con BotSort; el balón, de unos 15 px, exige un pase aparte sobre el video 4K a 2560 px. Una calibración de la lente convierte píxeles en metros con medio metro de error. Los equipos se asignan por el color de la camiseta y las pistas se enlazan en identidades.</p>
-      <p style="margin:0"><strong>Definiciones.</strong> Tiro: balón a ≥ 8 m/s dirigido a la portería desde ≤ 20 m. A puerta: dentro de la boca de la portería. Gol: tiro seguido de la formación de saque de centro. Distancia: integral de la trayectoria suavizada.</p>
+  <h2>Cómo se construyó</h2>
+  <p class="sub">Del video a las estadísticas hay seis etapas. Las dos primeras corren en una GPU del clúster de la UCR; el resto, en cualquier computadora.</p>
+
+  <div class="step"><div class="num">1</div><div>
+    <h3>Un detector de cuatro clases entrenado con partidos propios</h3>
+    <p>Los detectores genéricos no ven un balón de futsal a 30 m. Se anotaron 1 291 cuadros 4K de cuatro partidos (San Ramón, Grecia, Caribe y Los Chiles) con cuatro clases: <code>bola</code>, <code>juga</code> (jugador de campo), <code>port</code> (portero) y <code>ref</code> (árbitro). Con un duplicado aumentado por imagen son 2 274 imágenes a 1280 × 1280 px, 207 de validación. El modelo es YOLOv8m preentrenado, 100 épocas, unas dos horas en una GPU A100.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Versión</th><th>Datos</th><th class="n">mAP50</th><th class="n">mAP50-95</th><th class="n">balón</th><th class="n">jugador</th><th class="n">portero</th><th class="n">árbitro</th></tr></thead>
+      <tbody>
+      <tr><td>v4</td><td>560 cuadros de un partido, 512 px</td><td class="n">69.7</td><td class="n">40.0</td><td class="n">17.0</td><td class="n">87.2</td><td class="n">91.0</td><td class="n">83.6</td></tr>
+      <tr><td>v5</td><td>los mismos cuadros a 1280 px</td><td class="n">81.9</td><td class="n">45.2</td><td class="n">60.3</td><td class="n">89.8</td><td class="n">89.7</td><td class="n">88.0</td></tr>
+      <tr><td><strong>v7</strong> (en uso)</td><td>1 291 cuadros de cuatro partidos, 1280 px</td><td class="n"><strong>83.3</strong></td><td class="n"><strong>46.8</strong></td><td class="n">60.2</td><td class="n">91.7</td><td class="n">90.2</td><td class="n">91.0</td></tr>
+      <tr><td>v7 sin Los Chiles</td><td>validado en el partido no visto</td><td class="n">78.1</td><td class="n">44.2</td><td class="n">56.7</td><td class="n">85.5</td><td class="n">75.8</td><td class="n">94.4</td></tr>
+      </tbody></table></div>
+    <p class="caption">Precisión media por clase en validación (%). De v4 a v5 la ganancia es resolución: el balón pasa de 17 a 60. De v5 a v7 es amplitud de datos, sobre todo en personas y en la generalización a un partido no visto. El balón se queda en 60 con cualquier volumen de datos porque mide unos 7 px en la imagen que ve el modelo.</p>
+    <div class="figs">
+      <figure><img class="fig" src="figuras/entrenamiento_v7.png" alt="Curvas de entrenamiento del modelo v7" loading="lazy"><figcaption>Curvas de entrenamiento de v7: pérdidas y mAP por época.</figcaption></figure>
+      <figure><img class="fig" src="figuras/v5_vs_v7_clip.png" alt="Comparación v5 contra v7 en un clip de 5 minutos" loading="lazy"><figcaption>v5 contra v7 en el clip de prueba de cinco minutos: más balón visto y pistas más largas.</figcaption></figure>
     </div>
-    <div class="card">
-      <p style="margin:0 0 6px"><strong>Lo que todavía falla.</strong></p>
-      <ul class="notes">
-        <li>El gol de Grecia (10:42) no se detectó: el juego se reinició en diez segundos, sin la formación que busca el detector.</li>
-        <li>Tres tiros a puerta de Grecia aparecen como «posible gol, revisar»: el balón cruzó la línea en el modelo, pero no hubo saque de centro.</li>
-        <li>Las identidades no son dorsales; la lectura de números de camiseta está en desarrollo.</li>
-        <li>El balón se ve en el 62 % de los cuadros; con interpolación de huecos cortos, en el 78 %.</li>
-        <li>Un solo tiempo analizado. El segundo tiempo y otros partidos están pendientes.</li>
-      </ul>
+  </div></div>
+
+  <div class="step"><div class="num">2</div><div>
+    <h3>Personas: detección a 1080p y seguimiento con BotSort</h3>
+    <p>Las personas se detectan sobre el video reducido a 1080p (confianza 0.4, supresión de duplicados entre clases) y se siguen con BotSort. Con los valores por defecto el rastreador olvida una pista perdida a los 0.6 s y el 20 % de los cuadros tenía cajas dobles. Ajustado para cámara fija (memoria de 3 s, umbral alto para abrir pistas, sin compensación de movimiento) las cajas dobles bajan al 0.3 %, las pistas pasan de 1 219 a 201 en cinco minutos y su vida mediana sube de 0.3 a 5.3 s. En el primer tiempo completo el 36 % de los cuadros tiene exactamente 4 + 4 jugadores de campo con equipo asignado; el resto suele tener uno de menos (tapados entre sí) o uno de más.</p>
+    <div class="figs">
+      <figure><img class="fig" src="figuras/deteccion_personas.jpg" alt="Detección de personas en dos cuadros" loading="lazy"><figcaption>Minutos 07:18 y 15:27: diez jugadores, dos porteros y el árbitro, cada uno con identidad y equipo.</figcaption></figure>
+      <figure><img class="fig" src="figuras/identidades_gantt_1T.png" alt="Identidades por equipo a lo largo del tiempo" loading="lazy"><figcaption>Las identidades a lo largo del tiempo: cada barra es una identidad; las sustituciones y la pausa larga alrededor del minuto 17 las cortan.</figcaption></figure>
     </div>
+  </div></div>
+
+  <div class="step"><div class="num">3</div><div>
+    <h3>El balón: un pase aparte sobre el video 4K</h3>
+    <p>El balón mide unos 15 px en 4K y desaparece al reducir a 1080p. Por eso se corre un segundo pase sobre el video 4K completo a 2560 px, solo con la clase balón y un piso de confianza muy bajo (0.05), que produce muchos candidatos. El filtrado se hace después en el plano de la cancha: se descartan los candidatos que exigirían velocidades imposibles, se encadenan en tramos y se interpolan los huecos de hasta medio segundo. Resultado en el primer tiempo: balón detectado en el 62 % de los cuadros, 85 % con interpolación. Un detector anterior entrenado con cámaras cercanas, aun con mejores números en su propio dataset, solo lo encontraba en el 18 %. Los 27 minutos de video toman 53 minutos en una A100.</p>
+    <div class="figs">
+      <figure><img class="fig" src="figuras/balon_casos_dificiles.jpg" alt="Casos difíciles del balón" loading="lazy"><figcaption>Casos difíciles: balón perdido 9.6 s en un despeje largo; perdido 3.5 s; medio segundo tapado entre las piernas (posición interpolada); detectado al fondo con confianza 0.23 y unos 7 px.</figcaption></figure>
+      <figure><div class="card" style="padding:14px"><dl class="kv">
+        <dt>Entrada</dt><dd>video 4K a 50 cuadros por segundo</dd>
+        <dt>Inferencia</dt><dd>2560 px, confianza ≥ 0.05, clase balón</dd>
+        <dt>Filtro</dt><dd>velocidad máxima y continuidad en metros</dd>
+        <dt>Huecos</dt><dd>interpolados hasta 0.5 s</dd>
+        <dt>Cobertura</dt><dd>62 % detectado, 85 % con interpolación</dd>
+        <dt>Golpeos</dt><dd>tramos a ≥ 8 m/s sostenidos</dd>
+      </dl></div></figure>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="num">4</div><div>
+    <h3>De píxeles a metros: calibrar la lente</h3>
+    <p>La cámara tiene una lente gran angular con distorsión fuerte. Sobre un cuadro limpio se marcan a mano unos quince puntos de la cancha (bases y extremos de ambas porterías, extremos de la línea central, esquinas visibles) y se ajusta un modelo de lente ojo de pez: pose de la cámara, focal, punto principal y dos términos de distorsión. Los pies de cada caja (centro inferior) se proyectan al plano de la cancha, de 37.19 × 17.2 m. El error típico es de ±0.3 m en el centro y hasta ±1 m junto a las líneas de meta. Una calibración sirve para todo lo grabado desde la misma posición de cámara; si el trípode se mueve, bastan quince clics nuevos.</p>
+    <div class="figs">
+      <figure><img class="fig" src="figuras/calibracion_cancha.jpg" alt="Contorno de la cancha proyectado con la calibración" loading="lazy"><figcaption>El contorno de la cancha proyectado con la calibración sobre el cuadro: la prueba visual de que las líneas coinciden.</figcaption></figure>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="num">5</div><div>
+    <h3>Equipos por color e identidades por continuidad</h3>
+    <p>Cada detección recibe un equipo por el color mediano de su torso (en el espacio Lab): camiseta oscura para San Ramón, gris para Grecia; los porteros, por la portería que defienden. Una pista que cambia de equipo se corta en ese punto. Después, por equipo, los segmentos se enlazan fin con inicio mediante una asignación global (algoritmo húngaro con la opción de no enlazar) que pondera distancia recorrida y tiempo transcurrido. El resultado son identidades que duran de uno a once minutos: 26 para San Ramón y 35 para Grecia en el primer tiempo, con un portero por portería. Son identidades del sistema, no dorsales; la lectura de los números de camiseta está en desarrollo y funciona solo en el lado cercano a la cámara.</p>
+  </div></div>
+
+  <div class="step"><div class="num">6</div><div>
+    <h3>Las estadísticas, con sus definiciones</h3>
+    <ul class="notes">
+      <li><strong>Posesión.</strong> Cuadros en que el jugador más cercano al balón está a 2.5 m o menos, contados por equipo.</li>
+      <li><strong>Golpeo.</strong> Tramo en que el balón supera 8 m/s de forma sostenida.</li>
+      <li><strong>Tiro.</strong> Golpeo desde 20 m o menos cuya trayectoria apunta a la boca de la portería (±3 m del centro) y que llega a 4 m de la línea, o se pierde en el camino. El tirador es el jugador de campo más cercano al punto de golpeo.</li>
+      <li><strong>A puerta.</strong> Trayectoria dentro de los 3 m de la portería y balón a 1 m o menos de la línea.</li>
+      <li><strong>Saque de centro.</strong> Balón quieto en el punto central durante 0.6 s con cada equipo en su propia mitad (al menos tres jugadores de campo en la propia, a lo sumo uno en la contraria).</li>
+      <li><strong>Gol.</strong> Saque de centro (que no sea el del inicio del tiempo) precedido por un tiro en los 120 s anteriores; el equipo que saca es el que recibió el gol. Un balón que cruza la línea sin saque posterior queda como «posible gol, revisar»: en el video son paradas del portero sobre la línea.</li>
+      <li><strong>Distancia.</strong> Longitud de la trayectoria de cada identidad suavizada con una ventana de 0.5 s, dentro de cada tramo continuo (se corta en huecos de más de 2 s o saltos imposibles). Sin suavizar, el temblor de la caja cuadro a cuadro infla la distancia alrededor de un tercio.</li>
+    </ul>
+    <h3 style="margin-top:16px">Validación del detector de goles</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Minuto</th><th>Detector</th><th>Evidencia</th><th>Video</th></tr></thead>
+      <tbody>
+      <tr><td>05:16</td><td>Gol San Ramón</td><td>tiro que cruzó la línea; saque de Grecia en 06:20</td><td>confirmado</td></tr>
+      <tr><td>10:42</td><td>nada</td><td>Grecia marca y San Ramón reinicia en 10 s, sin formación</td><td><strong>gol perdido</strong></td></tr>
+      <tr><td>10:45</td><td>Gol San Ramón (inferido)</td><td>solo formación de saque; saque en 11:10</td><td>confirmado</td></tr>
+      <tr><td>14:45</td><td>Gol San Ramón</td><td>tiro a puerta; saque en 15:05</td><td>confirmado</td></tr>
+      <tr><td>22:27, 24:30, 25:21</td><td>posible gol</td><td>balón cruzó la línea, sin saque posterior</td><td>paradas sobre la línea</td></tr>
+      </tbody></table></div>
+    <p class="caption">Tres de los cuatro goles reales se detectaron, sin falsos positivos. El gol de Grecia se pierde por la regla del saque, no por el balón.</p>
+  </div></div>
+
+  <div class="card">
+    <p><strong>Cómputo.</strong> Entrenamiento: unas 2 h en una GPU A100. Primer tiempo: pase de personas 42 min, pase de balón 53 min, ambos en el clúster HPC de la UCR mediante SLURM. El posprocesamiento (proyección, equipos, identidades, balón, estadísticas) corre en CPU en una computadora de escritorio en menos de media hora. Herramientas: Ultralytics YOLOv8, BotSort, NumPy, SciPy, Matplotlib, ffmpeg. Todo el código, los CSV y los pesos de los modelos están en el repositorio y su página de versiones.</p>
   </div>
+</section>
+
+<section id="limites">
+  <h2>Lo que todavía falla</h2>
+  <div class="grid2">
+    <div class="card"><ul class="notes" style="margin:0">
+      <li><strong>Goles con reinicio rápido.</strong> El gol de Grecia (10:42) no se detectó porque el juego se reanudó en diez segundos, sin la formación que busca el detector. Hace falta una segunda señal, por ejemplo el balón cruzando la línea y los jugadores retrocediendo.</li>
+      <li><strong>Identidades, no dorsales.</strong> Una identidad puede mezclar a dos personas tras una sustitución, y una persona reparte sus minutos entre varias identidades.</li>
+      <li><strong>El balón es el cuello de botella.</strong> Se ve en el 62 % de los cuadros; se pierde en despejes largos, en el aire y entre piernas.</li>
+    </ul></div>
+    <div class="card"><ul class="notes" style="margin:0">
+      <li><strong>Precisión de medio metro.</strong> La calibración y la posición de los pies en la caja limitan cualquier medida a unos 0.5 m; junto a las líneas de meta, a 1 m.</li>
+      <li><strong>Distancias provisionales.</strong> El suavizado reduce el temblor pero no elimina del todo el ruido; los valores por minuto son una estimación razonable, no una medida de posicionamiento.</li>
+      <li><strong>Un solo tiempo.</strong> El segundo tiempo y los demás partidos grabados están pendientes de procesar.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="video">
+  <h2>El tiempo completo en video</h2>
+  <p class="sub">Los 27 minutos del primer tiempo, enderezados y reducidos a 720p (25 cuadros por segundo), tal como entran al sistema. Sirve para comprobar cualquier evento de la tabla con el minuto en la mano.</p>
+  <div class="card" style="padding:0;overflow:hidden">
+    <video controls preload="none" poster="figuras/cuadros/0516_gol_a4.jpg" style="width:100%;display:block;aspect-ratio:16/9;background:#000">
+      <source src="https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases/download/v2026.11/grecia_1T_2026-05-09_upright_720p.mp4" type="video/mp4">
+      Tu navegador no reproduce el video; <a href="https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases/download/v2026.11/grecia_1T_2026-05-09_upright_720p.mp4">descárgalo aquí</a>.
+    </video>
+  </div>
+  <p class="caption">El archivo se sirve desde la página de versiones del repositorio. Ahí está también el <a href="https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases/download/v2026.11/clip_1T_tercer_gol_60s_grecia-v7.mp4">clip anotado de un minuto</a> alrededor del tercer gol, con identidades y balón dibujados.</p>
 </section>
 
 <section id="datos">
@@ -151,16 +286,14 @@ footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px soli
   <p class="sub">Todo lo que se muestra se genera a partir de tres CSV y un JSON de resumen del primer tiempo, disponibles en el repositorio junto con el código.</p>
   <div class="links">
     <a href="https://github.com/tomas0821/Futsal-UCR-Vision-computacional">Repositorio</a>
-    <a href="pipeline.md">Pipeline (docs/pipeline.md)</a>
-    <a href="resultados.md">Resultados detallados</a>
+    <a href="https://github.com/tomas0821/Futsal-UCR-Vision-computacional/blob/main/docs/pipeline.md">Pipeline, etapa por etapa</a>
+    <a href="https://github.com/tomas0821/Futsal-UCR-Vision-computacional/blob/main/docs/resultados.md">Resultados detallados</a>
     <a href="datos_1T/grecia_1T_v7_events.csv">events.csv</a>
     <a href="datos_1T/grecia_1T_v7_players.csv">players.csv</a>
     <a href="datos_1T/grecia_1T_v7_teams.csv">teams.csv</a>
     <a href="datos_1T/grecia_1T_v7_sitio.json">sitio.json</a>
     <a href="https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases">Pesos de los modelos</a>
   </div>
-  <p class="caption" style="margin-top:16px"><img class="hero" src="figuras/deteccion_personas.jpg" alt="Detección de personas en dos cuadros del primer tiempo"></p>
-  <p class="caption">Minutos 07:18 y 15:27: 4 + 4 jugadores de campo, dos porteros y el árbitro, cada uno con identidad y equipo.</p>
 </section>
 
 <footer>
@@ -185,6 +318,11 @@ try{D=await (await fetch('datos_1T/grecia_1T_v7_sitio.json')).json()}
 catch(err){document.getElementById('tiles').insertAdjacentHTML('beforebegin','<p class="err">No se pudo cargar datos_1T/grecia_1T_v7_sitio.json. Si abriste el archivo localmente, sírvelo con un servidor web (por ejemplo <code>python3 -m http.server</code>).</p>');return}
 const L=D.pitch.L,W=D.pitch.W,T=D.teams,N=D.names;
 const col=t=>t==='A'?'var(--A)':'var(--B)';
+const teamOf=e=>e.team.startsWith('San')?'A':'B';
+const kind=e=>e.type.startsWith('goal')?'gol':e.type.includes('possible')?'posible':e.type.includes('on target')?'puerta':e.type.startsWith('shot')?'tiro':e.type==='kick-off'?'saque':'';
+const KN={gol:'Gol',posible:'A puerta, posible gol (revisar)',puerta:'Tiro a puerta',tiro:'Tiro',saque:'Saque de centro'};
+const num=(re,s)=>{const m=s.match(re);return m?parseFloat(m[1]):NaN};
+function detailEs(d){return d.replace('speed','velocidad').replace('from the goal centre','del centro de la portería').replace('from','desde').replace('aimed','dirigido a').replace('crossed the line at','cruzó la línea a').replace('after a goal by','tras un gol de').replace('shot crossed the line','el tiro cruzó la línea').replace('shot seen','tiro visto').replace('kick-off formation only (shot not tracked)','solo formación de saque (tiro no rastreado)').replace('kick-off at','saque en')}
 
 // --- tiles
 const tiles=document.getElementById('tiles');
@@ -194,15 +332,16 @@ tiles.innerHTML=row('Goles detectados',T.A.goals,T.B.goals)+row('Posesión',T.A.
  +row('Distancia del equipo',`${T.A.km.toFixed(1)}<small>km</small>`,`${T.B.km.toFixed(1)}<small>km</small>`);
 tiles.insertAdjacentHTML('afterend',`<div class="legend"><span><i class="dot dotA"></i>${N.A}</span><span><i class="dot dotB"></i>${N.B}</span></div>`);
 
-// --- pitch drawing (viewBox in metres, origin top-left, y down = toward the camera)
-function pitch(parent,opts={}){
+// --- pitch drawing (viewBox in metres; y grows toward the camera)
+function pitch(parent){
   const m=1.6, svg=el('svg',{class:'pitch',viewBox:`${-m} ${-m} ${L+2*m} ${W+2*m}`,role:'img'},parent);
-  if(opts.bg)el('rect',{x:0,y:0,width:L,height:W,fill:'var(--pitch)'},svg);
+  const defs=el('defs',{},svg);
+  for(const t of ['A','B']){const mk=el('marker',{id:'arr'+t+parent.id,viewBox:'0 0 10 10',refX:'8',refY:'5',markerWidth:'4',markerHeight:'4',orient:'auto-start-reverse',markerUnits:'strokeWidth'},defs);el('path',{d:'M0 0 L10 5 L0 10 z',fill:col(t)},mk)}
+  el('rect',{x:0,y:0,width:L,height:W,fill:'var(--pitch)'},svg);
   const g=el('g',{},svg);
   el('rect',{x:0,y:0,width:L,height:W,class:'pl'},g);
   el('line',{x1:L/2,y1:0,x2:L/2,y2:W,class:'pl'},g);
   el('circle',{cx:L/2,cy:W/2,r:3,class:'pl'},g);
-  // futsal penalty areas: 6 m arcs from each post joined by a 3 m straight
   const gw=3, y1=W/2-gw/2, y2=W/2+gw/2;
   el('path',{d:`M0 ${y1-6} A6 6 0 0 1 6 ${y1} L6 ${y2} A6 6 0 0 1 0 ${y2+6}`,class:'pl'},g);
   el('path',{d:`M${L} ${y1-6} A6 6 0 0 0 ${L-6} ${y1} L${L-6} ${y2} A6 6 0 0 0 ${L} ${y2+6}`,class:'pl'},g);
@@ -210,40 +349,59 @@ function pitch(parent,opts={}){
   el('circle',{cx:6,cy:W/2,r:.12,fill:'var(--line)'},g);el('circle',{cx:L-6,cy:W/2,r:.12,fill:'var(--line)'},g);
   return svg;
 }
-function arrows(svg,a,b){ // attacking-direction labels under the pitch
-  const y=W+1.1;
+function arrows(svg,a,b){const y=W+1.1;
   if(a)el('text',{x:0.2,y,class:'dir'},svg).textContent=a;
-  if(b){const t=el('text',{x:L-0.2,y,class:'dir','text-anchor':'end'},svg);t.textContent=b}
-}
+  if(b)el('text',{x:L-0.2,y,class:'dir','text-anchor':'end'},svg).textContent=b}
 
-// --- shot map
+// --- shot map: arrows from the kick point to where the trajectory meets the goal line
 {
-  const svg=pitch(document.getElementById('shotmap'),{bg:true});
+  const box=document.getElementById('shotmap'), svg=pitch(box);
   arrows(svg,`◀ ${N.A} ataca`,`${N.B} ataca ▶`);
   const ev=D.events.filter(e=>e.x!==''&&(e.type.startsWith('shot')||e.type.startsWith('goal')));
-  const kind=e=>e.type.startsWith('goal')?'gol':e.type.includes('possible')?'posible':e.type.includes('on target')?'puerta':'tiro';
   for(const e of ev){
-    const t=e.team.startsWith('San')?'A':'B',k=kind(e),x=+e.x,y=+e.y,c=col(t);
+    const t=teamOf(e),k=kind(e),x=+e.x,y=+e.y,c=col(t);
+    const cross=num(/crossed the line at ([+-]?[\d.]+)/,e.detail), aim=num(/aimed ([+-]?[\d.]+)/,e.detail);
+    const off=isFinite(cross)?cross:aim; const gx=D.attack[t]==='left'?0:L, gy=W/2+(isFinite(off)?off:0);
     const g=el('g',{class:'shot'},svg);
-    el('circle',{cx:x,cy:y,r:1.1,class:'hit'},g);
-    const mk=el('circle',{cx:x,cy:y,r:.5,class:'mk',stroke:c,'stroke-width':.14,fill:k==='tiro'?'var(--surface)':c,'fill-opacity':k==='posible'?.4:1},g);
-    if(k==='gol'){el('circle',{cx:x,cy:y,r:.17,fill:'var(--surface)'},g)}
-    if(k!=='tiro')el('text',{x:x,y:y-.85,'text-anchor':'middle','font-size':'.75','fill':'var(--text2)'},g).textContent=e.player;
-    const d=e.detail.replace('speed','velocidad').replace('from','desde').replace('aimed','dirigido a').replace('from the goal centre','del centro de la portería').replace('crossed the line at','cruzó la línea a');
-    bind(g,`${e.time} · ${e.team} ${e.player}\n${{gol:'Gol',posible:'A puerta, posible gol (revisar)',puerta:'Tiro a puerta',tiro:'Tiro'}[k]}\n${d}`);
+    el('line',{x1:x,y1:y,x2:gx,y2:gy,class:'hit'},g);
+    const wdt=k==='tiro'?.12:.2;
+    el('line',{x1:x,y1:y,x2:gx,y2:gy,stroke:c,'stroke-width':wdt,'stroke-linecap':'round','marker-end':`url(#arr${t}${box.id})`,'stroke-dasharray':k==='posible'?'.45 .3':'none','stroke-opacity':k==='tiro'?.75:1},g);
+    el('circle',{cx:x,cy:y,r:k==='tiro'?.28:.38,class:'mk',fill:k==='tiro'?'var(--surface)':c,stroke:c,'stroke-width':.12},g);
+    if(k==='gol')el('circle',{cx:x,cy:y,r:.13,fill:'var(--surface)'},g);
+    if(k!=='tiro')el('text',{x:x,y:y+1.3,'text-anchor':'middle','font-size':'.75','fill':'var(--text2)'},g).textContent=e.player;
+    bind(g,`${e.time} · ${e.team} ${e.player}\n${KN[k]}\n${detailEs(e.detail)}`);
   }
   const lg=document.getElementById('shotlegend');
-  const sw=(fill,stroke,half,inner)=>`<svg width="16" height="16" viewBox="-1 -1 2 2"><circle r=".8" fill="${fill}" stroke="${stroke}" stroke-width=".25" ${half?'fill-opacity=".4"':''}/>${inner?'<circle r=".25" fill="var(--surface)"/>':''}</svg>`;
-  lg.innerHTML=`<span><i class="dot dotA"></i>${N.A}</span><span><i class="dot dotB"></i>${N.B}</span><span>${sw('var(--surface)','currentColor')} tiro</span><span>${sw('currentColor','currentColor')} a puerta</span><span>${sw('currentColor','currentColor',true)} posible gol</span><span>${sw('currentColor','currentColor',false,true)} gol</span>`;
-  const rows=D.events.map(e=>`<tr><td>${e.time}</td><td><span class="dot ${e.team.startsWith('San')?'dotA':'dotB'}"></span> ${e.team}</td><td>${e.player||'—'}</td><td>${e.type}</td><td>${e.detail}</td></tr>`).join('');
+  const sw=(k)=>{const d=k==='posible'?'stroke-dasharray="3 2"':'',w=k==='tiro'?1.4:2.2,o=k==='tiro'?.75:1;
+    return `<svg width="34" height="14" viewBox="0 0 34 14"><line x1="5" y1="7" x2="28" y2="7" stroke="currentColor" stroke-width="${w}" stroke-opacity="${o}" ${d} stroke-linecap="round"/><path d="M26 3 L32 7 L26 11 z" fill="currentColor"/><circle cx="5" cy="7" r="3" fill="${k==='tiro'?'var(--surface)':'currentColor'}" stroke="currentColor" stroke-width="1.4"/>${k==='gol'?'<circle cx="5" cy="7" r="1.1" fill="var(--surface)"/>':''}</svg>`};
+  lg.innerHTML=`<span><i class="dot dotA"></i>${N.A}</span><span><i class="dot dotB"></i>${N.B}</span><span>${sw('tiro')} tiro</span><span>${sw('puerta')} a puerta</span><span>${sw('posible')} posible gol</span><span>${sw('gol')} gol</span>`;
+  const rows=D.events.map(e=>`<tr><td>${e.time}</td><td><span class="dot dot${teamOf(e)}"></span> ${e.team}</td><td>${e.player||'—'}</td><td>${KN[kind(e)]||e.type}</td><td>${detailEs(e.detail)}</td></tr>`).join('');
   document.getElementById('evtable').innerHTML=`<table><thead><tr><th>Min</th><th>Equipo</th><th>Id.</th><th>Evento</th><th>Detalle</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// --- timeline: two lanes, 0..27 min
+{
+  const box=document.getElementById('timeline'), w=1000, h=120, x0=70, x1=w-16, tmax=27*60;
+  const svg=el('svg',{class:'tl',viewBox:`0 0 ${w} ${h}`,role:'img'},box);
+  const X=t=>x0+(x1-x0)*t/tmax, lane={A:38,B:84};
+  for(let m=0;m<=27;m+=3){el('line',{x1:X(m*60),y1:20,x2:X(m*60),y2:h-18,class:'ax','stroke-dasharray':'2 3'},svg);el('text',{x:X(m*60),y:h-4,'text-anchor':'middle'},svg).textContent=`${m}'`}
+  for(const t of ['A','B']){el('line',{x1:x0,y1:lane[t],x2:x1,y2:lane[t],class:'ax'},svg);el('text',{x:x0-10,y:lane[t]+4,'text-anchor':'end','font-weight':'600',fill:'var(--text)'},svg).textContent=N[t]}
+  for(const e of D.events){
+    const k=kind(e); if(!k)continue; const t=teamOf(e), x=X(+e.t), y=lane[t], c=col(t), g=el('g',{class:'ev'},svg);
+    el('rect',{x:x-7,y:y-18,width:14,height:36,fill:'transparent'},g);
+    if(k==='saque'){el('circle',{cx:x,cy:y,r:5,fill:'var(--surface)',stroke:'var(--text2)','stroke-width':1.5},g)}
+    else if(k==='gol'){el('circle',{cx:x,cy:y,r:8,fill:c},g);el('circle',{cx:x,cy:y,r:2.6,fill:'var(--surface)'},g)}
+    else{el('line',{x1:x,y1:y-(k==='tiro'?7:11),x2:x,y2:y+(k==='tiro'?7:11),stroke:c,'stroke-width':k==='tiro'?2:4,'stroke-linecap':'round','stroke-dasharray':k==='posible'?'3 2.5':'none'},g)}
+    bind(g,`${e.time} · ${e.team}${e.player?' '+e.player:''}\n${KN[k]}\n${detailEs(e.detail)}`);
+  }
+  document.getElementById('tllegend').innerHTML=`<span><svg width="14" height="16"><line x1="7" y1="2" x2="7" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> tiro</span><span><svg width="14" height="18"><line x1="7" y1="1" x2="7" y2="17" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg> a puerta</span><span><svg width="14" height="18"><line x1="7" y1="1" x2="7" y2="17" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="3 2.5"/></svg> posible gol</span><span><svg width="18" height="18"><circle cx="9" cy="9" r="8" fill="currentColor"/><circle cx="9" cy="9" r="2.6" fill="var(--surface)"/></svg> gol</span><span><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/></svg> saque de centro del equipo que recibió el gol</span>`;
 }
 
 // --- heat maps
 for(const t of ['A','B']){
-  const svg=pitch(document.getElementById('heat'+t),{bg:true});
+  const svg=pitch(document.getElementById('heat'+t));
   const H=D.heat[t], c=col(t), g=el('g',{},svg);
-  svg.insertBefore(g,svg.children[1]); // cells under the lines
+  svg.insertBefore(g,svg.children[2]); // under the lines, over the pitch fill
   for(let i=0;i<H.length;i++)for(let j=0;j<H[i].length;j++){
     const v=H[i][j]; if(v<3)continue;
     const r=el('rect',{x:j/2,y:i/2,width:.5,height:.5,class:'cell',fill:c,'fill-opacity':(0.08+0.92*v/100).toFixed(3)},g);
