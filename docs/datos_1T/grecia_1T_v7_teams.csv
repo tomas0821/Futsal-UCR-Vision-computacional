@@ -1,3 +1,3 @@
-team,goals,shots,on_target,possession,mean_shot_dist,distance_km
-San Ramon,3,5,1,26%,11.1,13.9
-Grecia,0,9,3,74%,9.2,16.3
+team,goals,shots,on_target,possession,mean_shot_dist,distance_km,xg
+San Ramon,3,5,1,26%,11.1,13.9,0.31
+Grecia,0,9,3,74%,9.2,16.3,0.83

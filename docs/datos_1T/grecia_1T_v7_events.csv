@@ -1,19 +1,19 @@
-half,time,t,type,team,player,x,y,detail
-1T,01:51,111.2,shot,San Ramon,A2,12.5,7.0,"speed 16.7 m/s, from 12.6 m, aimed -1.8 m from the goal centre"
-1T,02:17,137.7,shot,Grecia,B4,26.6,15.9,"speed 15.8 m/s, from 12.8 m, aimed -1.6 m from the goal centre"
-1T,02:22,142.1,shot on target,Grecia,B8,33.8,12.4,"speed 21.2 m/s, from 5.1 m, aimed +0.8 m from the goal centre"
-1T,04:59,299.4,shot,San Ramon,A6,4.4,0.1,"speed 19.7 m/s, from 9.6 m, aimed +0.2 m from the goal centre"
-1T,05:16,316.3,goal,San Ramon,A4,11.2,9.2,"speed 12.8 m/s, from 11.3 m, aimed +0.0 m from the goal centre, crossed the line at +1.0 m"
-1T,06:20,380.8,kick-off,Grecia,,18.6,8.6,after a goal by San Ramon (shot crossed the line)
-1T,10:45,645.4,goal (inferred),San Ramon,?,,,kick-off formation only (shot not tracked); kick-off at 11:10
-1T,11:10,670.4,kick-off,Grecia,,18.6,8.6,after a goal by San Ramon (kick-off formation only (shot not tracked))
-1T,13:48,828.9,shot,Grecia,B10,27.1,8.8,"speed 16.8 m/s, from 10.1 m, aimed +2.4 m from the goal centre"
-1T,14:03,843.4,shot,Grecia,B15,29.0,8.5,"speed 8.0 m/s, from 8.2 m, aimed -1.7 m from the goal centre, crossed the line at -2.5 m"
-1T,14:04,844.2,shot,Grecia,B15,32.4,6.5,"speed 23.6 m/s, from 5.3 m, aimed -1.9 m from the goal centre, crossed the line at -2.5 m"
-1T,14:41,881.7,shot,San Ramon,A11,17.4,15.0,"speed 8.5 m/s, from 18.5 m, aimed -1.4 m from the goal centre"
-1T,14:45,885.8,goal,San Ramon,A8,2.5,6.2,"speed 21.7 m/s, from 3.4 m, aimed -0.1 m from the goal centre"
-1T,15:05,905.5,kick-off,Grecia,,18.6,8.6,after a goal by San Ramon (shot seen)
-1T,22:03,1323.1,shot,Grecia,B23,23.1,16.6,"speed 21.9 m/s, from 16.2 m, aimed -2.2 m from the goal centre"
-1T,22:27,1347.6,"shot on target, possible goal (review)",Grecia,B22,25.7,10.3,"speed 23.2 m/s, from 11.7 m, aimed +0.3 m from the goal centre, crossed the line at +0.3 m"
-1T,24:30,1471.0,"shot on target, possible goal (review)",Grecia,B18,28.6,13.4,"speed 15.6 m/s, from 9.8 m, aimed +0.2 m from the goal centre, crossed the line at +1.0 m"
-1T,25:21,1521.4,"shot on target, possible goal (review)",Grecia,B18,34.1,7.7,"speed 20.5 m/s, from 3.2 m, aimed -1.8 m from the goal centre, crossed the line at -1.9 m"
+half,time,t,type,team,player,x,y,detail,xg
+1T,01:51,111.2,shot,San Ramon,A2,12.5,7.0,"speed 16.7 m/s, from 12.6 m, aimed -1.8 m from the goal centre",0.020
+1T,02:17,137.7,shot,Grecia,B4,26.6,15.9,"speed 15.8 m/s, from 12.8 m, aimed -1.6 m from the goal centre",0.015
+1T,02:22,142.1,shot on target,Grecia,B8,33.8,12.4,"speed 21.2 m/s, from 5.1 m, aimed +0.8 m from the goal centre",0.138
+1T,04:59,299.4,shot,San Ramon,A6,4.4,0.1,"speed 19.7 m/s, from 9.6 m, aimed +0.2 m from the goal centre",0.025
+1T,05:16,316.3,goal,San Ramon,A4,11.2,9.2,"speed 12.8 m/s, from 11.3 m, aimed +0.0 m from the goal centre, crossed the line at +1.0 m",0.031
+1T,06:20,380.8,kick-off,Grecia,,18.6,8.6,after a goal by San Ramon (shot crossed the line),
+1T,10:45,645.4,goal (inferred),San Ramon,?,,,kick-off formation only (shot not tracked); kick-off at 11:10,
+1T,11:10,670.4,kick-off,Grecia,,18.6,8.6,after a goal by San Ramon (kick-off formation only (shot not tracked)),
+1T,13:48,828.9,shot,Grecia,B10,27.1,8.8,"speed 16.8 m/s, from 10.1 m, aimed +2.4 m from the goal centre",0.044
+1T,14:03,843.4,shot,Grecia,B15,29.0,8.5,"speed 8.0 m/s, from 8.2 m, aimed -1.7 m from the goal centre, crossed the line at -2.5 m",0.080
+1T,14:04,844.2,shot,Grecia,B15,32.4,6.5,"speed 23.6 m/s, from 5.3 m, aimed -1.9 m from the goal centre, crossed the line at -2.5 m",0.174
+1T,14:41,881.7,shot,San Ramon,A11,17.4,15.0,"speed 8.5 m/s, from 18.5 m, aimed -1.4 m from the goal centre",0.003
+1T,14:45,885.8,goal,San Ramon,A8,2.5,6.2,"speed 21.7 m/s, from 3.4 m, aimed -0.1 m from the goal centre",0.234
+1T,15:05,905.5,kick-off,Grecia,,18.6,8.6,after a goal by San Ramon (shot seen),
+1T,22:03,1323.1,shot,Grecia,B23,23.1,16.6,"speed 21.9 m/s, from 16.2 m, aimed -2.2 m from the goal centre",0.005
+1T,22:27,1347.6,"shot on target, possible goal (review)",Grecia,B22,25.7,10.3,"speed 23.2 m/s, from 11.7 m, aimed +0.3 m from the goal centre, crossed the line at +0.3 m",0.027
+1T,24:30,1471.0,"shot on target, possible goal (review)",Grecia,B18,28.6,13.4,"speed 15.6 m/s, from 9.8 m, aimed +0.2 m from the goal centre, crossed the line at +1.0 m",0.042
+1T,25:21,1521.4,"shot on target, possible goal (review)",Grecia,B18,34.1,7.7,"speed 20.5 m/s, from 3.2 m, aimed -1.8 m from the goal centre, crossed the line at -1.9 m",0.302

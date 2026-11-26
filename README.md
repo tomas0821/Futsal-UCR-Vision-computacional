@@ -2,7 +2,7 @@
 
 Sistema desarrollado en la Universidad de Costa Rica para analizar partidos de futsal a partir de **una sola cámara fija 4K**. Detecta balón, jugadores, porteros y árbitros con YOLOv8, los sigue en el tiempo, los proyecta a la cancha en metros y produce estadísticas del partido: posesión, tiros, goles, mapas de calor y distancia recorrida.
 
-Los resultados provisionales del primer tiempo analizado (mapa de tiros, mapas de calor y distancias) se pueden ver en **[tomas0821.github.io/Futsal-UCR-Vision-computacional](https://tomas0821.github.io/Futsal-UCR-Vision-computacional/)**.
+Los resultados provisionales del primer tiempo analizado (mapa de tiros, xG provisional, mapas de calor y distancias) se pueden ver en **[tomas0821.github.io/Futsal-UCR-Vision-computacional](https://tomas0821.github.io/Futsal-UCR-Vision-computacional/)**.
 
 El repositorio presenta los métodos y los resultados del proyecto: cada carpeta `ejemplo-N` es un experimento de entrenamiento o inferencia reproducible en el clúster de la UCR, y `analisis-partido/` contiene el procesamiento posterior que convierte las detecciones en estadísticas.
 
@@ -28,7 +28,7 @@ flowchart LR
 1. **Detección.** Un solo modelo YOLOv8m (`grecia-v7`) con cuatro clases: `bola`, `juga`, `port`, `ref`. Las personas se detectan sobre el video a 1080p; el balón, de unos 15 px en 4K, necesita un pase aparte sobre el video 4K completo a 2560 px.
 2. **Seguimiento.** BotSort ajustado para cámara fija (memoria de 3 s, sin compensación de movimiento). Cada pista recibe un equipo por el color de la camiseta y las pistas se enlazan en identidades por equipo.
 3. **Calibración.** Un modelo de lente ojo de pez ajustado con unos 15 puntos de la cancha marcados a mano en un cuadro; convierte píxeles en metros con un error de medio metro aproximadamente.
-4. **Analítica.** Posesión por cercanía al balón, tiros por velocidad y dirección del balón, goles por la formación de saque de centro que sigue a cada gol, mapas de calor y distancia por identidad.
+4. **Analítica.** Posesión por cercanía al balón, tiros por velocidad y dirección del balón, goles por la formación de saque de centro que sigue a cada gol, mapas de calor, distancia por identidad y un xG provisional por tiro (`analisis-partido/xg_provisional.py`).
 
 La descripción completa de cada etapa, con los comandos y los formatos de datos, está en [docs/pipeline.md](docs/pipeline.md).
 
@@ -54,6 +54,7 @@ Primer tiempo San Ramón vs Grecia, 27 minutos, 82 252 cuadros procesados sin in
 | Goles detectados (resultado real 3 – 1) | 3 | 0 |
 | Posesión | 26 % | 74 % |
 | Tiros / a puerta | 5 / 1 | 9 / 3 |
+| xG provisional | 0.31 | 0.83 |
 
 <p>
 <img src="docs/figuras/mapa_tiros_1T.png" width="49%" alt="Mapa de tiros del primer tiempo">

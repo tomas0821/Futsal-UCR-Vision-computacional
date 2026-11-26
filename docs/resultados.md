@@ -56,6 +56,7 @@ Procesado con grecia-v7, 82 252 cuadros, sin intervención manual. Los CSV compl
 | Posesión | 26 % | 74 % |
 | Tiros / a puerta | 5 / 1 | 9 / 3 |
 | Distancia media de tiro | 11.1 m | 9.2 m |
+| xG provisional (modelo geométrico, ver abajo) | 0.31 | 0.83 |
 
 ![Reporte del primer tiempo](figuras/reporte_1T.png)
 
@@ -68,6 +69,17 @@ Validación del detector de goles cuadro a cuadro:
 | 10:45 | Gol San Ramón (inferido) | solo formación de saque; saque en 11:10 | confirmado |
 | 14:45 | Gol San Ramón | tiro a puerta; saque en 15:05 | confirmado |
 | 22:27, 24:30, 25:21 | posible gol | balón cruzó la línea, sin saque posterior | paradas del portero sobre la línea |
+
+### xG provisional
+
+Cada tiro con posición recibe una probabilidad geométrica de gol: `xG = sigmoide(0.253 − 0.329·d) · θ/θc(d)`, con `d` la distancia al centro de la portería (m), `θ` el ángulo que abarca la boca de la portería desde el punto de golpeo y `θc(d)` ese ángulo de frente a la misma distancia. La curva de distancia sale por discriminante lineal de las medias publicadas para futsal por Doewes, Elumalai y Azmi (2023, *Rev. Iberoam. Psicol. Ejerc. Deporte* 18(2):235–237: 65 tiros, 5 goles; goles desde 5.27 ± 0.69 m, fallos desde 11.36 ± 4.44 m). No está ajustada a nuestros datos (un tiempo tiene 14 tiros y 2 goles con posición) y se recalibrará cuando haya varios partidos. Script: [`analisis-partido/xg_provisional.py`](../analisis-partido/xg_provisional.py); columna `xg` en `events.csv`, `teams.csv` y `players.csv`.
+
+| | San Ramón | Grecia |
+| :--- | ---: | ---: |
+| Tiros con posición | 5 | 9 |
+| xG acumulado | 0.31 | 0.83 |
+| Goles con tiro rastreado | 2 | 0 |
+| Mejor ocasión | A8 14:45, 0.23 (gol) | B18 25:21, 0.30 (parada) |
 
 ### Detección de personas
 
@@ -97,3 +109,4 @@ Las etiquetas (A4, B2, …) son identidades del enlazador de pistas, no dorsales
 | Grecia, jugadores de campo | 15.9 km | 10.4 km | 6.6 km |
 
 El valor realista está cerca de la columna suavizada: 95 a 100 m/min por jugador de campo, frente a 117 a 121 m/min del futsal de élite medido con sistemas de posicionamiento. Los porteros pasan de 66 a 34 m/min al suavizar, lo que da la magnitud del ruido de fondo. La columna `top_speed` del CSV (percentil 99 de la velocidad suavizada a 0.5 s) produce valores imposibles de 20 a 43 m/s en identidades cortas: el filtro reparte en medio segundo el salto de una unión entre pistas. Con ventana de 1 s dentro de cada tramo continuo, la velocidad máxima por identidad queda entre 4 y 7.3 m/s (hasta 26 km/h), que sí es realista. `sprint_s` sufre el mismo artefacto. Corrección pendiente: suavizar antes de integrar y medir la velocidad máxima con ventana de 1 s.
+
