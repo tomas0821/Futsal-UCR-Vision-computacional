@@ -108,5 +108,7 @@ Las etiquetas (A4, B2, …) son identidades del enlazador de pistas, no dorsales
 | San Ramón, jugadores de campo | 13.4 km | 9.2 km | 6.6 km |
 | Grecia, jugadores de campo | 15.9 km | 10.4 km | 6.6 km |
 
+Los totales por equipo no son comparables entre sí: el rastreo cubre el 88 % de los minutos-jugador de San Ramón (96 de 110 = 4 jugadores × 27.4 min) y el 101 % de los de Grecia (alguna identidad duplicada). Por minuto rastreado los dos equipos corren igual, 98 y 97 m/min; la diferencia de 1.3 km es cobertura, no esfuerzo. El sitio muestra por eso el ritmo y no el total.
+
 El valor realista está cerca de la columna suavizada: 95 a 100 m/min por jugador de campo, frente a 117 a 121 m/min del futsal de élite medido con sistemas de posicionamiento. Los porteros pasan de 66 a 34 m/min al suavizar, lo que da la magnitud del ruido de fondo. La columna `top_speed` del CSV (percentil 99 de la velocidad suavizada a 0.5 s) produce valores imposibles de 20 a 43 m/s en identidades cortas: el filtro reparte en medio segundo el salto de una unión entre pistas. Con ventana de 1 s dentro de cada tramo continuo, la velocidad máxima por identidad queda entre 4 y 7.3 m/s (hasta 26 km/h), que sí es realista. `sprint_s` sufre el mismo artefacto. Corrección pendiente: suavizar antes de integrar y medir la velocidad máxima con ventana de 1 s.
 

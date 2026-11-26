@@ -175,7 +175,7 @@ footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px soli
 
 <section id="distancias">
   <h2>Distancia recorrida</h2>
-  <p class="sub">Por identidad de seguimiento (A1, B4, …), no por dorsal: una identidad dura entre 1 y 11 minutos y puede corresponder a más de una persona tras una sustitución. Trayectoria suavizada a 0.5 s antes de integrar; velocidad máxima con ventana de 1 s.</p>
+  <p class="sub">Por identidad de seguimiento (A1, B4, …), no por dorsal: una identidad dura entre 1 y 11 minutos y puede corresponder a más de una persona tras una sustitución. Trayectoria suavizada a 0.5 s antes de integrar; velocidad máxima con ventana de 1 s. La cifra comparable entre equipos es el ritmo por minuto rastreado, no el total de kilómetros, que depende de cuántos minutos se siguió a cada equipo.</p>
   <div class="grid2">
     <div class="card"><div id="barsA"></div></div>
     <div class="card"><div id="barsB"></div></div>
@@ -284,7 +284,7 @@ footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px soli
     </ul></div>
     <div class="card"><ul class="notes" style="margin:0">
       <li><strong>Precisión de medio metro.</strong> La calibración y la posición de los pies en la caja limitan cualquier medida a unos 0.5 m; junto a las líneas de meta, a 1 m.</li>
-      <li><strong>Distancias provisionales.</strong> El suavizado reduce el temblor pero no elimina del todo el ruido; los valores por minuto son una estimación razonable, no una medida de posicionamiento.</li>
+      <li><strong>Distancias provisionales.</strong> El suavizado reduce el temblor pero no elimina del todo el ruido; los valores por minuto son una estimación razonable, no una medida de posicionamiento. Los totales por equipo dependen además de la cobertura del rastreo (88 % de los minutos-jugador de San Ramón, 101 % de los de Grecia en este tiempo): compárense ritmos, no kilómetros.</li>
       <li><strong>xG prestado.</strong> La curva de probabilidad viene de un solo partido publicado, no de nuestros datos; sirve para ordenar ocasiones, no para comparar con otros modelos.</li>
       <li><strong>Un solo tiempo.</strong> El segundo tiempo y los demás partidos grabados están pendientes de procesar.</li>
     </ul></div>
@@ -346,12 +346,16 @@ const KN={gol:'Gol',posible:'A puerta, posible gol (revisar)',puerta:'Tiro a pue
 const num=(re,s)=>{const m=s.match(re);return m?parseFloat(m[1]):NaN};
 function detailEs(d){return d.replace('speed','velocidad').replace('from the goal centre','del centro de la portería').replace('from','desde').replace('aimed','dirigido a').replace('crossed the line at','cruzó la línea a').replace('after a goal by','tras un gol de').replace('shot crossed the line','el tiro cruzó la línea').replace('shot seen','tiro visto').replace('kick-off formation only (shot not tracked)','solo formación de saque (tiro no rastreado)').replace('kick-off at','saque en')}
 
+// --- tracking coverage per team: player-minutes tracked vs 4 outfield players on court for the whole half
+const HALF=D.frames/50/60, COV={};
+for(const t of ['A','B']){const ps=D.players.filter(p=>p.team===t), mins=ps.reduce((s,p)=>s+p.min,0), m=ps.reduce((s,p)=>s+p.m,0); COV[t]={min:Math.round(mins),cov:Math.round(100*mins/(4*HALF)),mpm:Math.round(m/mins)}}
+
 // --- tiles
 const tiles=document.getElementById('tiles');
 const row=(lab,fa,fb)=>`<div class="tile"><div class="lab">${lab}</div><div class="vals"><div class="v"><span class="dot dotA"></span>${fa}</div><div class="v"><span class="dot dotB"></span>${fb}</div></div></div>`;
 tiles.innerHTML=row('Goles detectados',T.A.goals,T.B.goals)+row('Posesión',T.A.possession+'<small>%</small>',T.B.possession+'<small>%</small>')
  +row('Tiros · a puerta',`${T.A.shots}<small>· ${T.A.on_target}</small>`,`${T.B.shots}<small>· ${T.B.on_target}</small>`)
- +row('Distancia del equipo',`${T.A.km.toFixed(1)}<small>km</small>`,`${T.B.km.toFixed(1)}<small>km</small>`)
+ +row('Ritmo de carrera',`${COV.A.mpm}<small>m/min</small>`,`${COV.B.mpm}<small>m/min</small>`)
  +row('xG provisional',`${T.A.xg.toFixed(2)}<small>xG</small>`,`${T.B.xg.toFixed(2)}<small>xG</small>`);
 tiles.insertAdjacentHTML('afterend',`<div class="legend"><span><i class="dot dotA"></i>${N.A}</span><span><i class="dot dotB"></i>${N.B}</span></div>`);
 
@@ -443,7 +447,7 @@ for(const t of ['A','B']){
     bind(r,`${N[t]} · x ${(j/2).toFixed(1)} m, y ${(i/2).toFixed(1)} m\n${v} % del máximo del equipo`);
   }
   arrows(svg,t==='A'?`◀ ${N.A} ataca`:'',t==='B'?`${N.B} ataca ▶`:'');
-  document.getElementById('cap'+t).innerHTML=`<span class="dot dot${t}"></span> <strong>${N[t]}</strong> · ${T[t].possession} % de posesión · ${T[t].km.toFixed(1)} km recorridos`;
+  document.getElementById('cap'+t).innerHTML=`<span class="dot dot${t}"></span> <strong>${N[t]}</strong> · ${T[t].possession} % de posesión · ${COV[t].mpm} m/min de carrera`;
 }
 
 // --- distance bars
@@ -463,7 +467,7 @@ bars('A',document.getElementById('barsA'));bars('B',document.getElementById('bar
   const gk=D.players.filter(p=>p.team==='GK');
   const outf=D.players.filter(p=>p.team!=='GK'&&p.min>=3);
   const med=a=>{const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)]};
-  document.getElementById('gkcap').textContent=`Ritmo típico de un jugador de campo con al menos 3 min seguidos: ${med(outf.map(p=>p.mpm))} m/min (el futsal de élite medido con sistemas de posicionamiento ronda 117 a 121 m/min). Porteros: ${gk.map(p=>`${p.id==='GK_left1'?'izquierda':'derecha'} ${fmt(p.m)} m en ${p.min} min`).join(', ')}. Sin suavizar, los totales por equipo serían ${T.A.raw_km} y ${T.B.raw_km} km: alrededor de un tercio de temblor del rastreo.`;
+  document.getElementById('gkcap').textContent=`Totales por equipo: ${T.A.km.toFixed(1)} km para ${N.A} con el ${COV.A.cov} % de los minutos-jugador rastreados (${COV.A.min} de ${Math.round(4*HALF)}) y ${T.B.km.toFixed(1)} km para ${N.B} con el ${COV.B.cov} %. La diferencia entre equipos es cobertura del rastreo, no esfuerzo: por minuto rastreado corren igual (${COV.A.mpm} y ${COV.B.mpm} m/min). Ritmo típico de un jugador de campo con al menos 3 min seguidos: ${med(outf.map(p=>p.mpm))} m/min (el futsal de élite medido con sistemas de posicionamiento ronda 117 a 121 m/min). Porteros: ${gk.map(p=>`${p.id==='GK_left1'?'izquierda':'derecha'} ${fmt(p.m)} m en ${p.min} min`).join(', ')}. Sin suavizar, los totales por equipo serían ${T.A.raw_km} y ${T.B.raw_km} km: alrededor de un tercio de temblor del rastreo.`;
   const rows=D.players.map(p=>`<tr><td><span class="dot ${p.team==='A'?'dotA':p.team==='B'?'dotB':''}"></span> ${p.team==='GK'?'Portero':N[p.team]}</td><td>${p.id}</td><td class="n">${p.min}</td><td class="n">${fmt(p.m)}</td><td class="n">${p.mpm}</td><td class="n">${p.vmax}</td><td class="n">${fmt(p.raw_m)}</td><td class="n">${p.shots}</td><td class="n">${p.goals}</td></tr>`).join('');
   document.getElementById('pltable').innerHTML=`<table><thead><tr><th>Equipo</th><th>Id.</th><th class="n">min</th><th class="n">m</th><th class="n">m/min</th><th class="n">v máx (m/s)</th><th class="n">m sin suavizar</th><th class="n">tiros</th><th class="n">goles</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
