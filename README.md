@@ -92,7 +92,7 @@ Entorno probado: Python 3.11, Ultralytics 8.4, PyTorch con CUDA, una GPU A100 po
 
 | Dataset | Proyecto Roboflow | Versión en uso | Contenido |
 | :--- | :--- | :--- | :--- |
-| Grecia | `football-ucr/grecia` | 7 | 1 291 cuadros 4K de 4 partidos (San Ramón, Grecia, Caribe, Los Chiles), 4 clases, exportados a 1280 × 1280 con duplicado aumentado. |
+| Grecia | [`football-ucr/grecia`](https://universe.roboflow.com/football-ucr/grecia) | 7 | 1 291 cuadros 4K de 4 partidos (San Ramón, Grecia, Caribe, Los Chiles), 4 clases, exportados a 1280 × 1280 con duplicado aumentado. |
 | UCR-Futsal-Ball2 | `football-ucr/ucr-futsal-ball2` | 6 | Balón, cámaras cercanas. |
 | Futsal-UCR | `football-ucr/futsal-ucr` | 8 | Porteros, jugadores y árbitros. |
 | ucr-futsal-field3 | `football-ucr/ucr-futsal-field3` | 3 | 10 puntos clave de la cancha. |
@@ -109,4 +109,4 @@ La clave de la API se guarda en `ejemplo-1-deteccion-basica/.env`; los demás ej
 
 ## Autoría
 
-Proyecto de investigación [C6316](https://vinv.ucr.ac.cr/sigpro/web/projects/C6316) de la Universidad de Costa Rica, Sede Regional de Occidente, inscrito en la Vicerrectoría de Investigación: «Implementación de un protocolo para el análisis del rendimiento deportivo mediante videos, utilizando algoritmos de inteligencia artificial: una aplicación en fútbol sala» (2026–2027). Coordinador: Jorge Salazar. Equipo: Tomás Rojas y Eduardo Arias, con la participación de estudiantes asistentes. Entrenamiento e inferencia en el clúster HPC de la UCR (GPU A100, SLURM). Para citar el repositorio, ver [CITATION.cff](CITATION.cff).
+Proyecto de investigación [C6316](https://vinv.ucr.ac.cr/sigpro/web/projects/C6316) de la Universidad de Costa Rica, Sede Regional de Occidente, inscrito en la Vicerrectoría de Investigación: «Implementación de un protocolo para el análisis del rendimiento deportivo mediante videos, utilizando algoritmos de inteligencia artificial: una aplicación en fútbol sala» (2026–2027). Coordinador: Jorge Salazar. Investigadores: Tomás Rojas y Eduardo Arias. Asistentes: Mariana Soto y Yoselin Gamboa. El dataset de entrenamiento `grecia` es público en [Roboflow Universe](https://universe.roboflow.com/football-ucr/grecia). Entrenamiento e inferencia en el clúster HPC de la UCR (GPU A100, SLURM). Para citar el repositorio, ver [CITATION.cff](CITATION.cff).

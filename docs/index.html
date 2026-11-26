@@ -30,6 +30,7 @@ header{padding:40px 0 20px}
 h1{font-size:clamp(28px,4.5vw,42px);line-height:1.1;margin:0 0 12px;letter-spacing:-.01em}
 .lead{font-size:18px;color:var(--text2);max-width:62ch;margin:0}
 .proj{font-size:14px;color:var(--text2);max-width:72ch;margin:12px 0 0}
+.meta{font-size:14px;color:var(--text2);margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px 22px;padding:0;list-style:none}.meta b{color:var(--text);font-weight:600}
 .badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--warn-bg);color:var(--warn);vertical-align:middle;margin-left:8px}
 nav.toc{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--text2);margin:18px 0 0}
 section{padding:28px 0}
@@ -111,6 +112,12 @@ footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px soli
   <h1>Un primer tiempo de futsal, leído por una sola cámara <span class="badge">provisional</span></h1>
   <p class="lead">San Ramón vs Grecia, 9 de mayo de 2026, primer tiempo (27 minutos). Una cámara fija 4K, un detector entrenado con partidos propios y un procesamiento sin intervención manual.</p>
   <p class="proj">Resultados del proyecto <a href="https://vinv.ucr.ac.cr/sigpro/web/projects/C6316">C6316</a>, «Implementación de un protocolo para el análisis del rendimiento deportivo mediante videos, utilizando algoritmos de inteligencia artificial: una aplicación en fútbol sala», inscrito en la Vicerrectoría de Investigación de la UCR (2026–2027).</p>
+  <ul class="meta">
+    <li><b>Coordinador</b> Jorge Salazar</li>
+    <li><b>Investigadores</b> Tomás Rojas, Eduardo Arias</li>
+    <li><b>Asistentes</b> Mariana Soto, Yoselin Gamboa</li>
+    <li><b>Dataset</b> <a href="https://universe.roboflow.com/football-ucr/grecia">football-ucr/grecia en Roboflow Universe</a></li>
+  </ul>
   <nav class="toc"><a href="#resumen">Resumen</a><a href="#tiros">Mapa de tiros</a><a href="#xg">xG</a><a href="#linea">Línea de tiempo</a><a href="#momentos">Momentos</a><a href="#calor">Mapas de calor</a><a href="#distancias">Distancias</a><a href="#metodo">Cómo se construyó</a><a href="#limites">Límites</a><a href="#video">Video</a><a href="#datos">Datos</a></nav>
 </header>
 
@@ -314,12 +321,13 @@ footer{padding:30px 0 50px;color:var(--text2);font-size:14px;border-top:1px soli
     <a href="datos_1T/grecia_1T_v7_teams.csv">teams.csv</a>
     <a href="datos_1T/grecia_1T_v7_sitio.json">sitio.json</a>
     <a href="https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases">Pesos de los modelos</a>
+    <a href="https://universe.roboflow.com/football-ucr/grecia">Dataset en Roboflow Universe</a>
     <a href="https://git.ucr.ac.cr/futsal-ucr/vision-computacional">Espejo en git.ucr.ac.cr</a>
   </div>
 </section>
 
 <footer>
-  Proyecto de investigación <a href="https://vinv.ucr.ac.cr/sigpro/web/projects/C6316">C6316</a> de la Universidad de Costa Rica, Sede Regional de Occidente, inscrito en la Vicerrectoría de Investigación (vigencia 2026–2027). Coordinador: Jorge Salazar. Equipo: Tomás Rojas y Eduardo Arias. Entrenamiento e inferencia en el clúster HPC de la UCR. Resultados provisionales, sujetos a revisión.
+  Proyecto de investigación <a href="https://vinv.ucr.ac.cr/sigpro/web/projects/C6316">C6316</a> de la Universidad de Costa Rica, Sede Regional de Occidente, inscrito en la Vicerrectoría de Investigación (vigencia 2026–2027). Coordinador: Jorge Salazar. Investigadores: Tomás Rojas y Eduardo Arias. Asistentes: Mariana Soto y Yoselin Gamboa. Entrenamiento e inferencia en el clúster HPC de la UCR. Resultados provisionales, sujetos a revisión.
 </footer>
 </div>
 
