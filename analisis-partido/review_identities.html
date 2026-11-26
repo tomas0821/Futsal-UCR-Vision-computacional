@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Identity Review</title>
+<style>
+  :root{--bg:#f4f4f1;--panel:#fff;--ink:#1e1e1c;--muted:#6b6b66;--line:#d9d9d3;--accent:#2a78d6;--warn:#eb6834;--a:#1f3a93;--b:#8c8c84;--gk:#eb6834}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;height:100vh;display:flex;flex-direction:column}
+  header{padding:8px 14px;border-bottom:1px solid var(--line);background:var(--panel);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  header h1{font-size:15px;margin:0 8px 0 0}
+  button{padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font:inherit;cursor:pointer} button.primary{background:var(--accent);color:#fff;border-color:var(--accent)} button.warn{background:var(--warn);color:#fff;border-color:var(--warn)} button:disabled{opacity:.45;cursor:default}
+  select,input[type=text]{padding:4px 6px;border:1px solid var(--line);border-radius:4px;font:inherit}
+  main{flex:1;display:grid;grid-template-columns:1fr 340px;min-height:0}
+  #stage{position:relative;background:#111;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  video{max-width:100%;max-height:100%;display:block} canvas{position:absolute;left:0;top:0;cursor:crosshair}
+  #drop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#bbb;text-align:center;padding:30px;pointer-events:none;font-size:15px}
+  #hud{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px;pointer-events:none}
+  aside{border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:10px;display:flex;flex-direction:column;gap:10px}
+  .box{border:1px solid var(--line);border-radius:8px;padding:8px} .box h3{margin:0 0 6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0} kbd{background:#eee;border:1px solid #ccc;border-radius:3px;padding:0 4px;font-size:11px}
+  #ids{display:flex;flex-wrap:wrap;gap:4px} #ids span{padding:2px 7px;border-radius:10px;color:#fff;font-size:12px;cursor:pointer;border:2px solid transparent} #ids span.sel{border-color:#000}
+  #log{max-height:180px;overflow:auto;font-size:12px} #log div{padding:2px 0;border-bottom:1px dashed var(--line)}
+  .hint{color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Identity review</h1>
+  <input id="vfile" type="file" accept="video/*" style="display:none"><button id="vbtn">Open video…</button>
+  <input id="jfile" type="file" accept="application/json" style="display:none"><button id="jbtn">Open review JSON…</button>
+  <input id="cfile" type="file" accept="application/json" style="display:none"><button id="cbtn">Load corrections…</button>
+  <button id="play">Play <kbd>space</kbd></button>
+  <button id="back">−1 s <kbd>J</kbd></button><button id="fwd">+1 s <kbd>L</kbd></button>
+  <label>speed <select id="speed"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option></select></label>
+  <label><input id="trails" type="checkbox"> trails</label>
+  <button id="export" class="primary">Download corrections</button>
+</header>
+<main>
+  <div id="stage"><video id="v" muted playsinline></video><canvas id="cv"></canvas><div id="drop">Open the video (the 1080p tracked clip or the raw upright clip) and the review JSON</div><div id="hud"></div></div>
+  <aside>
+    <div class="box"><h3>Identities (click to select the target)</h3><div id="ids"></div><div class="row"><button id="newid">New identity for team… <kbd>N</kbd></button><select id="newteam"><option>A</option><option>B</option></select></div></div>
+    <div class="box"><h3>Selected box</h3><div id="selinfo" class="hint">Click a box on the video.</div>
+      <div class="row"><button id="relabel" disabled>Relabel whole segment → target <kbd>R</kbd></button></div>
+      <div class="row"><button id="split" disabled>Relabel from here on → target <kbd>X</kbd></button></div>
+      <div class="row"><button id="swap" disabled>Swap with target from here on <kbd>W</kbd></button></div>
+      <div class="row"><button id="del" class="warn" disabled>Delete segment (not a player) <kbd>D</kbd></button></div>
+    </div>
+    <div class="box"><h3>Lost player</h3><div class="hint">Select the target identity, press <kbd>P</kbd>, then click the player's feet on the video. Repeat every few seconds while the detector has lost them; positions are interpolated between marks.</div><div id="pmode" class="hint"></div></div>
+    <div class="box"><h3>Corrections <span id="nlog"></span></h3><div class="row"><button id="undo">Undo last <kbd>Z</kbd></button></div><div id="log"></div></div>
+    <div class="box hint">Keys: <kbd>←</kbd>/<kbd>→</kbd> one frame · <kbd>J</kbd>/<kbd>L</kbd> ±1 s · <kbd>space</kbd> play · <kbd>1–9</kbd> pick target among the selected box's team.</div>
+  </aside>
+</main>
+<script>
+const $=id=>document.getElementById(id); const v=$('v'), cv=$('cv'), ctx=cv.getContext('2d');
+let D=null, corr=[], sel=null, target=null, pmode=false, identities=[];
+const teamColor=id=>id.startsWith('A')?'#1f3a93':id.startsWith('B')?'#c8c8c0':id.startsWith('GK')?'#eb6834':'#888';
+const teamOf=id=>id.startsWith('A')?'A':id.startsWith('B')?'B':id.startsWith('GK')?'GK':'?';
+function frameNow(){ return Math.round(v.currentTime*D.fps/D.step)*D.step; }
+function effPid(sid, basePid, f){ // apply corrections in order
+  let pid=basePid, deleted=false;
+  for(const c of corr){
+    if(c.seg!==sid) continue;
+    if(c.op==='relabel') pid=c.to;
+    else if(c.op==='split'){ if(f>=c.frame) pid=c.to; }
+    else if(c.op==='swap'){ if(f>=c.frame){ if(pid===c.a) pid=c.b; else if(pid===c.b) pid=c.a; } }
+    else if(c.op==='delete') deleted=true;
+  }
+  // swaps also affect the other segment(s) carrying identity b: handled at render by scanning all boxes (see draw)
+  return deleted?null:pid;
+}
+function boxesAt(f){ const raw=D.frames[String(f)]||[]; const out=[];
+  for(const b of raw){ const [sid,pid,cls,x,y,w,h]=b; if(sid===0){ out.push({sid,pid,cls,x,y,w,h}); continue; }
+    let p=pid;
+    // swap corrections reference identities, not only the clicked segment: apply globally
+    for(const c of corr){ if(c.op==='swap' && f>=c.frame){ if(p===c.a) p=c.b; else if(p===c.b) p=c.a; } }
+    const e=effPid(sid,p,f); if(e===null) continue; out.push({sid,pid:e,cls,x,y,w,h}); }
+  // manual positions
+  for(const c of corr){ if(c.op==='mark' && Math.abs(c.frame-f)<=D.step*12){ out.push({sid:-1,pid:c.to,cls:'manual',x:c.x,y:c.y,w:40,h:90,manual:true}); } }
+  return out; }
+function fit(){ const r=v.getBoundingClientRect(), s=$('stage').getBoundingClientRect(); cv.width=r.width; cv.height=r.height; cv.style.left=(r.left-s.left)+'px'; cv.style.top=(r.top-s.top)+'px'; }
+function draw(){ if(!D||!v.videoWidth) return; fit(); const sx=cv.width/D.width, sy=cv.height/D.height; const f=frameNow(); ctx.clearRect(0,0,cv.width,cv.height);
+  const boxes=boxesAt(f); ctx.font='12px system-ui'; ctx.lineWidth=1.5;
+  if($('trails').checked){ for(let k=D.step*25;k>0;k-=D.step){ for(const b of boxesAt(f-k)){ if(b.sid<=0) continue; ctx.fillStyle=teamColor(b.pid)+'66'; ctx.fillRect((b.x)*sx-1,(b.y+b.h/2)*sy-1,2,2);} } }
+  for(const b of boxes){ const x1=(b.x-b.w/2)*sx,y1=(b.y-b.h/2)*sy,w=b.w*sx,h=b.h*sy; const c=b.cls==='bola'?'#00dc00':b.cls==='ref'?'#ffd700':teamColor(b.pid);
+    if(b.cls==='bola'){ ctx.strokeStyle=c; ctx.beginPath(); ctx.arc(b.x*sx,b.y*sy,Math.max(w,h)/2+5,0,7); ctx.stroke(); continue; }
+    ctx.strokeStyle=c; ctx.setLineDash(b.manual?[4,3]:[]); ctx.strokeRect(x1,y1,w,h); ctx.setLineDash([]);
+    if(sel&&sel.sid===b.sid&&b.sid>0){ ctx.lineWidth=3; ctx.strokeStyle='#ff2a2a'; ctx.strokeRect(x1-2,y1-2,w+4,h+4); ctx.lineWidth=1.5; }
+    const lab=b.cls==='ref'?'R':b.pid; const tw=ctx.measureText(lab).width+6; ctx.fillStyle=c; ctx.fillRect(x1,y1-15,tw,14); ctx.fillStyle=(b.pid&&b.pid.startsWith('B'))?'#000':'#fff'; ctx.fillText(lab,x1+3,y1-4); }
+  $('hud').textContent=`t = ${v.currentTime.toFixed(2)} s · frame ${f} · ${boxes.filter(b=>b.sid>0).length} people` + (pmode?'  ·  PLACE MODE: click the feet of '+target:'');
+  requestAnimationFrame(draw); }
+function renderIds(){ const d=$('ids'); d.innerHTML=''; identities.forEach(id=>{ const s=document.createElement('span'); s.textContent=id; s.style.background=teamColor(id); s.style.color=id.startsWith('B')?'#000':'#fff'; if(id===target) s.className='sel'; s.onclick=()=>{target=id;renderIds();updateButtons();}; d.appendChild(s); }); }
+function updateButtons(){ const ok=!!(sel&&sel.sid>0); ['relabel','split','swap','del'].forEach(k=>$(k).disabled=!ok||(k!=='del'&&!target)); $('selinfo').innerHTML=sel?`segment <b>${sel.sid}</b> · shown as <b>${sel.pid}</b> · target: <b>${target||'—'}</b>`:'Click a box on the video.'; $('nlog').textContent=`(${corr.length})`; }
+function log(){ const l=$('log'); l.innerHTML=''; corr.slice().reverse().forEach(c=>{ const d=document.createElement('div'); d.textContent=`${(c.frame/D.fps).toFixed(1)}s · ${c.op} seg ${c.seg??''} ${c.from?c.from+' → ':''}${c.to||''}${c.op==='swap'?c.a+' ⇄ '+c.b:''}`; l.appendChild(d); }); updateButtons(); }
+function add(c){ corr.push(c); log(); }
+cv.addEventListener('click',e=>{ if(!D) return; const r=cv.getBoundingClientRect(); const px=(e.clientX-r.left)*D.width/cv.width, py=(e.clientY-r.top)*D.height/cv.height; const f=frameNow();
+  if(pmode&&target){ add({op:'mark',frame:f,to:target,x:Math.round(px),y:Math.round(py-45)}); return; }
+  let best=null,bd=1e9; for(const b of boxesAt(f)){ if(b.sid<=0) continue; if(px>=b.x-b.w/2&&px<=b.x+b.w/2&&py>=b.y-b.h/2&&py<=b.y+b.h/2){ const d=Math.hypot(px-b.x,py-b.y); if(d<bd){bd=d;best=b;} } }
+  sel=best; updateButtons(); });
+$('relabel').onclick=()=>{ if(sel&&target) add({op:'relabel',seg:sel.sid,frame:frameNow(),from:sel.pid,to:target}); };
+$('split').onclick=()=>{ if(sel&&target) add({op:'split',seg:sel.sid,frame:frameNow(),from:sel.pid,to:target}); };
+$('swap').onclick=()=>{ if(sel&&target&&sel.pid!==target) add({op:'swap',seg:sel.sid,frame:frameNow(),a:sel.pid,b:target}); };
+$('del').onclick=()=>{ if(sel) add({op:'delete',seg:sel.sid,frame:frameNow(),from:sel.pid}); };
+$('undo').onclick=()=>{ corr.pop(); log(); };
+$('newid').onclick=()=>{ const t=$('newteam').value; let n=1; while(identities.includes(t+n)) n++; identities.push(t+n); target=t+n; renderIds(); updateButtons(); };
+$('play').onclick=()=>{ v.paused?v.play():v.pause(); };
+$('back').onclick=()=>{ v.currentTime=Math.max(0,v.currentTime-1); }; $('fwd').onclick=()=>{ v.currentTime+=1; };
+$('speed').onchange=()=>{ v.playbackRate=+$('speed').value; };
+window.addEventListener('keydown',e=>{ if(!D) return; if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT') return; const k=e.key;
+  if(k===' '){ e.preventDefault(); $('play').click(); } else if(k==='ArrowLeft'){ v.pause(); v.currentTime=Math.max(0,v.currentTime-D.step/D.fps); } else if(k==='ArrowRight'){ v.pause(); v.currentTime+=D.step/D.fps; }
+  else if(k==='j'||k==='J') $('back').click(); else if(k==='l'||k==='L') $('fwd').click(); else if(k==='r'||k==='R') $('relabel').click(); else if(k==='x'||k==='X') $('split').click(); else if(k==='w'||k==='W') $('swap').click(); else if(k==='d'||k==='D') $('del').click(); else if(k==='z'||k==='Z') $('undo').click(); else if(k==='n'||k==='N') $('newid').click();
+  else if(k==='p'||k==='P'){ pmode=!pmode; $('pmode').textContent=pmode?'Place mode ON — click the feet of '+(target||'(select a target)'):''; }
+  else if(k>='1'&&k<='9'&&sel){ const t=teamOf(sel.pid); const list=identities.filter(i=>teamOf(i)===t); const pick=list[+k-1]; if(pick){ target=pick; renderIds(); updateButtons(); } } });
+function loadJSON(txt){ D=JSON.parse(txt); identities=D.identities.filter(i=>!i.startsWith('?')); renderIds(); $('drop').style.display=v.src?'none':'flex'; updateButtons(); requestAnimationFrame(draw); }
+$('vbtn').onclick=()=>$('vfile').click(); $('vfile').onchange=e=>{ const f=e.target.files[0]; if(f){ v.src=URL.createObjectURL(f); v.onloadedmetadata=()=>{ $('drop').style.display=D?'none':'flex'; fit(); }; } };
+$('jbtn').onclick=()=>$('jfile').click(); $('jfile').onchange=e=>{ const f=e.target.files[0]; if(f) f.text().then(loadJSON); };
+$('cbtn').onclick=()=>$('cfile').click(); $('cfile').onchange=e=>{ const f=e.target.files[0]; if(f) f.text().then(t=>{ const j=JSON.parse(t); corr=j.corrections||[]; (j.identities||[]).forEach(i=>{ if(!identities.includes(i)) identities.push(i); }); renderIds(); log(); }); };
+$('export').onclick=()=>{ const j={source:D?D.source:null,fps:D?D.fps:null,created:new Date().toISOString(),identities,corrections:corr}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(j,null,1)],{type:'application/json'})); a.download='identity_corrections.json'; a.click(); };
+$('stage').addEventListener('dragover',e=>e.preventDefault()); $('stage').addEventListener('drop',e=>{ e.preventDefault(); for(const f of e.dataTransfer.files){ if(f.type.startsWith('video/')){ v.src=URL.createObjectURL(f); v.onloadedmetadata=()=>{ $('drop').style.display=D?'none':'flex'; fit(); }; } else if(f.name.endsWith('.json')) f.text().then(t=>{ const j=JSON.parse(t); if(j.frames) loadJSON(t); else { corr=j.corrections||[]; log(); } }); } });
+window.addEventListener('resize',fit);
+</script>
+</body>
+</html>

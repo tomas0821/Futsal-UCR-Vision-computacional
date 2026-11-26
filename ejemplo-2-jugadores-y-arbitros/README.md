@@ -37,3 +37,6 @@ Se utilizó un script (`filter_ball.py`) para eliminar las anotaciones del baló
 Clip de demostración con la detección de jugadores, porteros y árbitros:
 
 https://github.com/tomas0821/Futsal-UCR-Vision-computacional/raw/master/ejemplo-2-jugadores-y-arbitros/demo_personas.mp4
+
+## 📦 Pesos entrenados
+Los pesos `best.pt` no se guardan en git; se descargan de la página de [Releases](https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases) (archivo `ejemplo2_personas_yolov8m_mAP50-96p3.pt`) y se colocan en `runs/detect/futsal_jugadores_arbitros/yolov8m_sin_balon/weights/best.pt`.

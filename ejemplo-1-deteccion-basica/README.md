@@ -45,3 +45,6 @@ A continuación se presenta un clip de 10 segundos del modelo **YOLOv8m** proces
 https://github.com/tomas0821/Futsal-UCR-Vision-computacional/raw/master/ejemplo-1-deteccion-basica/demo_balon.mp4
 
 *(Nota: Si el video no se reproduce automáticamente, puedes descargarlo directamente de la carpeta)*
+
+## 📦 Pesos entrenados
+Los pesos `best.pt` no se guardan en git; se descargan de la página de [Releases](https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases) (archivo `ejemplo1_balon_yolov8m_mAP50-93p0.pt`) y se colocan en `runs/detect/futsal_training/yolov8m_ball_detection/weights/best.pt`.

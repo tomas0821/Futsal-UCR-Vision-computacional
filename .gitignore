@@ -30,6 +30,14 @@
 # Ignorar el resto de archivos .pt
 **/*.pt
 
-# Archivos de configuración de Claude Code
+# Notas locales de trabajo (no se publican)
 CLAUDE.md
 00_Master_Notebook.md
+
+# Datasets y salidas del ejemplo 5 y del análisis de partido
+**/Grecia-*/
+**/futsal_prediction/
+analisis-partido/**/*.csv
+analisis-partido/**/*.npz
+!analisis-partido/calibraciones/*.npz
+*.bak
