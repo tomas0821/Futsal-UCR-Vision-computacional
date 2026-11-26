@@ -108,4 +108,4 @@ La clave de la API se guarda en `ejemplo-1-deteccion-basica/.env`; los demás ej
 
 ## Autoría
 
-Proyecto de investigación de la Universidad de Costa Rica. Coordinador: Jorge Salazar. Equipo: Tomás Rojas y Eduardo Arias, con la participación de estudiantes asistentes. Entrenamiento e inferencia en el clúster HPC de la UCR (GPU A100, SLURM). Para citar el repositorio, ver [CITATION.cff](CITATION.cff).
+Proyecto de investigación [C6316](https://vinv.ucr.ac.cr/sigpro/web/projects/C6316) de la Universidad de Costa Rica, Sede Regional de Occidente, inscrito en la Vicerrectoría de Investigación: «Implementación de un protocolo para el análisis del rendimiento deportivo mediante videos, utilizando algoritmos de inteligencia artificial: una aplicación en fútbol sala» (2026–2027). Coordinador: Jorge Salazar. Equipo: Tomás Rojas y Eduardo Arias, con la participación de estudiantes asistentes. Entrenamiento e inferencia en el clúster HPC de la UCR (GPU A100, SLURM). Para citar el repositorio, ver [CITATION.cff](CITATION.cff).
