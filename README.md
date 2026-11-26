@@ -43,7 +43,7 @@ La descripción completa de cada etapa, con los comandos y los formatos de datos
 
 Los mAP de distintos datasets no se comparan entre sí: los modelos de los ejemplos 1 y 2 se midieron en sus propios datos, con cámaras más cercanas. Sobre el video 4K de la cámara fija, el detector de balón del ejemplo 1 encuentra el balón en el 18 % de los cuadros; `grecia-v7` a 2560 px, en el 62 % del primer tiempo completo y el 71 % del clip de prueba. Las tablas completas, incluida la comparación sobre el video real, están en [docs/resultados.md](docs/resultados.md).
 
-Los pesos (`.pt`) no viven en el repositorio: se descargan desde la página de [Releases](https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases) o desde el [espejo institucional en git.ucr.ac.cr](https://git.ucr.ac.cr/futsal-ucr/vision-computacional/-/releases). El video completo del primer tiempo está en [YouTube](https://youtu.be/5ASmzIn9ooI).
+Los pesos (`.pt`) no viven en el repositorio: se descargan desde la página de [Releases](https://github.com/tomas0821/Futsal-UCR-Vision-computacional/releases) o desde el [espejo institucional en git.ucr.ac.cr](https://git.ucr.ac.cr/futsal-ucr/vision-computacional/-/releases). El video completo del primer tiempo está en YouTube: [anotado](https://youtu.be/Lx_NbvC2Eto) (cajas, identidades y balón dibujados) y [sin anotaciones](https://youtu.be/5ASmzIn9ooI).
 
 ## Un primer tiempo analizado de principio a fin
 
